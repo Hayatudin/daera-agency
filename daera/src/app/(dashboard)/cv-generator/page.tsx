@@ -30,7 +30,7 @@ const TEMPLATES: any[] = [
 
 import { useCandidates } from '@/hooks/useCandidates';
 
-export default function CVGeneratorPage() {
+function CVGeneratorContent() {
   const searchParams = useSearchParams();
   const urlCandidateId = searchParams.get('candidateId');
 
@@ -469,5 +469,13 @@ export default function CVGeneratorPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function CVGeneratorPage() {
+  return (
+    <React.Suspense fallback={<div className="p-10 flex justify-center"><div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>}>
+      <CVGeneratorContent />
+    </React.Suspense>
   );
 }

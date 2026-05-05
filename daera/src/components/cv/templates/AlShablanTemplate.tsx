@@ -145,7 +145,7 @@ export default function AlShablanTemplate({ candidate, facePhoto, fullBodyPhoto 
                       <tr key={idx}>
                         <td className="border border-black px-2 py-1 text-center capitalize">{exp.country}</td>
                         <td className="border border-black px-2 py-1 text-center">{exp.yearsOfExperience}</td>
-                        <td className="border border-black px-2 py-1 text-center capitalize">{exp.jobRole || 'House Maid'}</td>
+                        <td className="border border-black px-2 py-1 text-center capitalize">{candidate.personalInfo?.job || 'House Maid'}</td>
                       </tr>
                     ))
                   ) : (

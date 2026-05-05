@@ -27,7 +27,7 @@ const emptyPersonalInfo: CandidatePersonalInfo = {
   additionalPhones: [], brokerId: '',
 };
 
-export default function RegistrationPage() {
+function RegistrationContent() {
   const searchParams = useSearchParams();
   const editId = searchParams.get('edit');
   const isEditMode = !!editId;
@@ -471,5 +471,13 @@ export default function RegistrationPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegistrationPage() {
+  return (
+    <React.Suspense fallback={<div className="p-10 flex justify-center"><div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>}>
+      <RegistrationContent />
+    </React.Suspense>
   );
 }

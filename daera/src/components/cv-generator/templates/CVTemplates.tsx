@@ -32,7 +32,7 @@ export function TemplateClassic({ candidate, facePhoto }: TemplateProps) {
       <div className="mt-4"><h3 className="font-bold text-gray-800 border-b border-gray-300 pb-1 mb-2">EDUCATION & LANGUAGES</h3>
         <p><strong>Education:</strong> {pi.educationLevel}</p><p><strong>Languages:</strong> {pi.languages.join(', ')}</p>
       </div>
-      <div className="mt-4"><h3 className="font-bold text-gray-800 border-b border-gray-300 pb-1 mb-2">WORK EXPERIENCE</h3><p>{pi.workExperience}</p></div>
+      <div className="mt-4"><h3 className="font-bold text-gray-800 border-b border-gray-300 pb-1 mb-2">WORK EXPERIENCE</h3><p>{pi.workExperience.map(e => `${e.experienceStatus} - ${e.country} (${e.yearsOfExperience})`).join(', ') || 'N/A'}</p></div>
       <div className="mt-4"><h3 className="font-bold text-gray-800 border-b border-gray-300 pb-1 mb-2">SKILLS</h3><p>{pi.skills.join(' • ')}</p></div>
     </div>
   );
@@ -54,7 +54,7 @@ export function TemplateModern({ candidate, facePhoto }: TemplateProps) {
         </div>
         <div><h3 className="text-xs font-bold text-indigo-600 uppercase mb-1">Languages</h3><div className="flex flex-wrap gap-1">{pi.languages.map(l=><span key={l} className="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-full text-[9px]">{l}</span>)}</div></div>
         <div><h3 className="text-xs font-bold text-indigo-600 uppercase mb-1">Skills</h3><div className="flex flex-wrap gap-1">{pi.skills.map(s=><span key={s} className="px-2 py-0.5 bg-violet-50 text-violet-600 rounded-full text-[9px]">{s}</span>)}</div></div>
-        <div><h3 className="text-xs font-bold text-indigo-600 uppercase mb-1">Experience</h3><p className="text-gray-700">{pi.workExperience}</p></div>
+        <div><h3 className="text-xs font-bold text-indigo-600 uppercase mb-1">Experience</h3><p className="text-gray-700">{pi.workExperience.map(e => `${e.experienceStatus} - ${e.country} (${e.yearsOfExperience})`).join(', ') || 'N/A'}</p></div>
         <div><h3 className="text-xs font-bold text-indigo-600 uppercase mb-1">Passport</h3><p className="text-gray-700">No: {p.passportNumber} | Issued: {formatDate(p.dateOfIssue)} | Expires: {formatDate(p.dateOfExpiry)}</p></div>
       </div>
     </div>
@@ -82,7 +82,7 @@ export function TemplateProfessional({ candidate, facePhoto, fullBodyPhoto }: Te
           <div className="grid grid-cols-2 gap-2"><p><strong>DOB:</strong> {formatDate(p.dateOfBirth)}</p><p><strong>Gender:</strong> {p.gender}</p><p><strong>Nationality:</strong> {p.nationality}</p><p><strong>Marital:</strong> {pi.maritalStatus}</p><p><strong>Religion:</strong> {pi.religion}</p><p><strong>Blood Type:</strong> {pi.bloodType}</p></div>
         </div>
         <div><h3 className="text-xs font-bold text-gray-800 mb-2">EDUCATION</h3><p>{pi.educationLevel}</p></div>
-        <div><h3 className="text-xs font-bold text-gray-800 mb-2">EXPERIENCE</h3><p>{pi.workExperience}</p></div>
+        <div><h3 className="text-xs font-bold text-gray-800 mb-2">EXPERIENCE</h3><p>{pi.workExperience.map(e => `${e.experienceStatus} - ${e.country} (${e.yearsOfExperience})`).join(', ') || 'N/A'}</p></div>
         <div><h3 className="text-xs font-bold text-gray-800 mb-2">SKILLS</h3><div className="flex flex-wrap gap-1">{pi.skills.map(s=><span key={s} className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-[9px]">{s}</span>)}</div></div>
         <div><h3 className="text-xs font-bold text-gray-800 mb-2">PASSPORT</h3><p>No: {p.passportNumber} | Valid: {formatDate(p.dateOfIssue)} - {formatDate(p.dateOfExpiry)}</p></div>
       </div>
@@ -100,7 +100,7 @@ export function TemplateMinimal({ candidate, facePhoto }: TemplateProps) {
       </div>
       <div className="h-px bg-gray-200 mb-6" />
       <div className="space-y-5">
-        {[{t:'Personal',c:`${formatDate(p.dateOfBirth)} • ${p.gender} • ${p.nationality} • ${pi.maritalStatus} • ${pi.religion}`},{t:'Education',c:pi.educationLevel},{t:'Languages',c:pi.languages.join(', ')},{t:'Experience',c:pi.workExperience},{t:'Skills',c:pi.skills.join(', ')},{t:'Passport',c:`${p.passportNumber} — Valid until ${formatDate(p.dateOfExpiry)}`}].map(s=>(
+        {[{t:'Personal',c:`${formatDate(p.dateOfBirth)} • ${p.gender} • ${p.nationality} • ${pi.maritalStatus} • ${pi.religion}`},{t:'Education',c:pi.educationLevel},{t:'Languages',c:pi.languages.join(', ')},{t:'Experience',c:pi.workExperience.map(e => `${e.experienceStatus} - ${e.country} (${e.yearsOfExperience})`).join(', ') || 'N/A'},{t:'Skills',c:pi.skills.join(', ')},{t:'Passport',c:`${p.passportNumber} — Valid until ${formatDate(p.dateOfExpiry)}`}].map(s=>(
           <div key={s.t}><h3 className="text-[9px] font-semibold uppercase tracking-widest text-gray-400 mb-1">{s.t}</h3><p className="text-gray-700">{s.c}</p></div>
         ))}
       </div>
@@ -131,7 +131,7 @@ export function TemplateElegant({ candidate, facePhoto, fullBodyPhoto }: Templat
           </div>
           <div className="space-y-3">
             <div><h3 className="text-xs font-bold text-amber-700 border-b border-amber-200 pb-1 mb-2">Languages & Skills</h3><p><em>Languages:</em> {pi.languages.join(', ')}</p><p><em>Skills:</em> {pi.skills.join(', ')}</p></div>
-            <div><h3 className="text-xs font-bold text-amber-700 border-b border-amber-200 pb-1 mb-2">Experience</h3><p>{pi.workExperience}</p></div>
+            <div><h3 className="text-xs font-bold text-amber-700 border-b border-amber-200 pb-1 mb-2">Experience</h3><p>{pi.workExperience.map(e => `${e.experienceStatus} - ${e.country} (${e.yearsOfExperience})`).join(', ') || 'N/A'}</p></div>
             <div><h3 className="text-xs font-bold text-amber-700 border-b border-amber-200 pb-1 mb-2">Passport Details</h3><p>No: {p.passportNumber}</p><p>Issued: {formatDate(p.dateOfIssue)}</p><p>Expires: {formatDate(p.dateOfExpiry)}</p></div>
           </div>
         </div>

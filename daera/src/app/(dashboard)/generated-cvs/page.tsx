@@ -316,7 +316,7 @@ export default function GeneratedCVsPage() {
 
   // Download state
   const [downloadingCv, setDownloadingCv] = useState<any | null>(null);
-  const [downloadFormat, setDownloadFormat] = useState<'pdf' | 'jpg' | null>(null);
+  const [downloadFormat, setDownloadFormat] = useState<'pdf' | 'jpg' | 'doc' | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const cvRenderRef = useRef<HTMLDivElement>(null);
 
@@ -501,7 +501,7 @@ export default function GeneratedCVsPage() {
     return () => { cancelled = true; };
   }, [downloadingCv, downloadFormat]);
 
-  const startDownload = (cv: any, format: 'pdf' | 'jpg') => {
+  const startDownload = (cv: any, format: 'pdf' | 'jpg' | 'doc') => {
     setDownloadingCv(cv);
     setDownloadFormat(format);
   };

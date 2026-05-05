@@ -18,6 +18,7 @@ interface SelectProps {
   error?: string;
   disabled?: boolean;
   searchable?: boolean;
+  required?: boolean;
 }
 
 export default function Select({
@@ -29,6 +30,7 @@ export default function Select({
   error,
   disabled = false,
   searchable = false,
+  required = false,
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
