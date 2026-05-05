@@ -242,13 +242,6 @@ export default function BrokerCandidatesPage() {
                     <td className="px-8 py-5 text-right pr-12">
                       <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
                         <button 
-                          onClick={(e) => { e.stopPropagation(); router.push(`/registration?edit=${candidate.id}`); }}
-                          className="p-2.5 rounded-xl text-text-tertiary hover:bg-primary hover:text-white transition-all border border-border/50 hover:border-primary/20 bg-white"
-                          title="Edit Profile"
-                        >
-                          <Edit3 size={16} />
-                        </button>
-                        <button 
                           onClick={(e) => { e.stopPropagation(); router.push(`/candidates/${candidate.id}`); }}
                           className="p-2.5 rounded-xl bg-primary text-white hover:bg-primary-600 transition-all "
                           title="View Details"

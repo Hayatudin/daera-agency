@@ -27,6 +27,9 @@ export async function GET() {
   try {
     const dbCandidates = await prisma.candidate.findMany({
       orderBy: { registeredAt: 'desc' },
+      include: {
+        generatedCVs: { select: { templateId: true } }
+      }
     });
 
     // Map flat DB structure to nested UI structure
@@ -89,6 +92,7 @@ export async function GET() {
       isRequested: c.isRequested || false,
       registeredAt: c.registeredAt.toISOString(),
       status: c.status,
+      generatedCVs: c.generatedCVs?.map(cv => cv.templateId) || [],
     }));
 
     return NextResponse.json(candidates);

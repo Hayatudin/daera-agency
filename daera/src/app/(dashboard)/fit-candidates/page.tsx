@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ClipboardList, Loader2, MoreVertical, CheckCircle, Trash2, Edit3, Eye, Search, UserCheck } from 'lucide-react';
+import { ClipboardList, Loader2, MoreVertical, CheckCircle, Trash2, Edit3, Eye, UserCheck } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
 import Input from '@/components/ui/Input';
 import { Candidate } from '@/types';
 
 import { useCandidates } from '@/hooks/useCandidates';
 
-export default function NotRequestedPage() {
+export default function FitCandidatesPage() {
   const router = useRouter();
   const { candidates: allCandidates, isLoading, mutate } = useCandidates();
   const [searchQuery, setSearchQuery] = useState('');
@@ -25,21 +25,7 @@ export default function NotRequestedPage() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const candidates = allCandidates.filter(c => !c.isRequested);
-
-  const markAsRequested = async (id: string) => {
-    setOpenMenuId(null);
-    try {
-      const res = await fetch(`/api/candidates/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isRequested: true }),
-      });
-      if (!res.ok) throw new Error();
-      // Update local state by removing the newly requested candidate
-      mutate(prev => prev.map(c => c.id === id ? { ...c, isRequested: true } : c));
-    } catch { alert('Failed to update status'); }
-  };
+  const candidates = allCandidates.filter(c => c.personalInfo.medicalStatus === 'Fit');
 
   const deleteCandidate = async (id: string) => {
     setOpenMenuId(null);
@@ -60,10 +46,10 @@ export default function NotRequestedPage() {
     <div className="space-y-6 animate-fade-in pb-10">
       <div>
         <h1 className="text-2xl font-bold text-text-primary flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-amber-50"><ClipboardList size={22} className="text-amber-600" /></div>
-          Not Requested Candidates
+          <div className="p-2 rounded-xl bg-emerald-50"><UserCheck size={22} className="text-emerald-600" /></div>
+          Fit Candidates
         </h1>
-        <p className="text-text-secondary mt-1 ml-12">Candidates who have not been requested yet</p>
+        <p className="text-text-secondary mt-1 ml-12">Candidates who are marked as Medically Fit</p>
       </div>
 
       <div className="w-full md:w-96">
@@ -78,8 +64,8 @@ export default function NotRequestedPage() {
                 <th className="px-6 py-4 font-semibold">Shelf ID</th>
                 <th className="px-6 py-4 font-semibold">Candidate</th>
                 <th className="px-6 py-4 font-semibold">Passport No.</th>
-                <th className="px-6 py-4 font-semibold">Job / Skills</th>
-                <th className="px-6 py-4 font-semibold">Status</th>
+                <th className="px-6 py-4 font-semibold">Medical</th>
+                <th className="px-6 py-4 font-semibold">Generated CVs</th>
                 <th className="px-6 py-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
@@ -94,8 +80,8 @@ export default function NotRequestedPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center shrink-0">
-                          <span className="text-amber-600 font-bold text-sm">{c.passportData.givenNames.charAt(0)}{c.passportData.surname.charAt(0)}</span>
+                        <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
+                          <span className="text-emerald-600 font-bold text-sm">{c.passportData.givenNames.charAt(0)}{c.passportData.surname.charAt(0)}</span>
                         </div>
                         <div>
                           <p className="font-semibold text-text-primary">{c.passportData.givenNames} {c.passportData.surname}</p>
@@ -106,12 +92,21 @@ export default function NotRequestedPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <p className="text-sm font-medium text-text-primary">{c.passportData.passportNumber}</p>
                     </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm text-text-primary font-medium">{c.personalInfo.job || 'N/A'}</p>
-                      <p className="text-xs text-text-tertiary truncate max-w-[180px]">{c.personalInfo.skills.slice(0, 3).join(', ')}</p>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Badge variant="success">Fit</Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Badge variant="warning">Not Requested</Badge>
+                      <div className="flex gap-2 flex-wrap max-w-[200px]">
+                        {c.generatedCVs && c.generatedCVs.length > 0 ? (
+                          c.generatedCVs.map((tmpl, idx) => (
+                            <span key={idx} className="px-2 py-1 text-[10px] uppercase font-bold bg-blue-50 text-blue-700 border border-blue-200 rounded-md">
+                              {tmpl.replace('tmpl-', '').toUpperCase()}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-xs text-text-tertiary">No CVs</span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="relative inline-block" data-action-menu>
@@ -120,11 +115,6 @@ export default function NotRequestedPage() {
                         </button>
                         {openMenuId === c.id && (
                           <div className="absolute right-0 top-full mt-1 w-52 bg-surface border border-border rounded-xl shadow-xl z-50 py-1 animate-fade-in">
-                            <button onClick={() => markAsRequested(c.id)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
-                              <UserCheck size={16} className="text-green-500" />
-                              <span>Mark as Requested</span>
-                            </button>
-                            <div className="border-t border-border my-1" />
                             <button onClick={() => deleteCandidate(c.id)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-red-50 transition-colors text-left text-red-600">
                               <Trash2 size={16} /><span>Delete</span>
                             </button>
@@ -135,7 +125,7 @@ export default function NotRequestedPage() {
                   </tr>
                 ))
               ) : (
-                <tr><td colSpan={6} className="px-6 py-10 text-center text-text-tertiary">No candidates found in this category.</td></tr>
+                <tr><td colSpan={6} className="px-6 py-10 text-center text-text-tertiary">No fit candidates found. Mark candidates as "Fit" from the Candidates page.</td></tr>
               )}
             </tbody>
           </table>

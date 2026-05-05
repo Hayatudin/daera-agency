@@ -14,6 +14,7 @@ import {
   Users,
   ClipboardList,
   FolderOpen,
+  UserCheck,
 } from 'lucide-react';
 
 const navItems = [
@@ -21,6 +22,7 @@ const navItems = [
   { label: 'Candidates', href: '/candidates', icon: Users, disabled: false },
   { label: 'Requested', href: '/requested', icon: ClipboardList, disabled: false },
   { label: 'Not Requested', href: '/not-requested', icon: ClipboardList, disabled: false },
+  { label: 'Fit Candidates', href: '/fit-candidates', icon: UserCheck, disabled: false },
   { label: 'Brokers', href: '/brokers', icon: Users, disabled: false },
   { label: 'Registration', href: '/registration', icon: UserPlus, disabled: false },
   { label: 'CV Generator', href: '/cv-generator', icon: FileText, disabled: false },

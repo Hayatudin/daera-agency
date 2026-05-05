@@ -172,9 +172,6 @@ export default function DashboardPage() {
                                 <CheckCircle size={16} className={candidate.isRequested ? 'text-green-500' : 'text-text-tertiary'} />
                                 <span>{candidate.isRequested ? 'Remove Requested' : 'Mark as Requested'}</span>
                               </button>
-                              <button onClick={() => { setOpenMenuId(null); router.push(`/registration?edit=${candidate.id}`); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
-                                <Edit3 size={16} className="text-text-tertiary" /><span>Edit</span>
-                              </button>
                               <div className="border-t border-border my-1" />
                               <button onClick={() => deleteCandidate(candidate.id)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-red-50 transition-colors text-left text-red-600">
                                 <Trash2 size={16} /><span>Delete</span>
@@ -267,9 +264,6 @@ export default function DashboardPage() {
                               <button onClick={() => toggleRequested(candidate.id, !!candidate.isRequested)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
                                 <CheckCircle size={16} className="text-amber-500" />
                                 <span>Remove Requested</span>
-                              </button>
-                              <button onClick={() => { setOpenMenuId(null); router.push(`/registration?edit=${candidate.id}`); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
-                                <Edit3 size={16} className="text-text-tertiary" /><span>Edit</span>
                               </button>
                               <div className="border-t border-border my-1" />
                               <button onClick={() => deleteCandidate(candidate.id)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-red-50 transition-colors text-left text-red-600">

@@ -75,6 +75,7 @@ export interface Candidate {
   brokerId?: string;
   broker?: Broker;
   latestCVTemplate?: string | null;
+  generatedCVs?: string[];
 }
 
 export interface Broker {

@@ -135,9 +135,6 @@ export default function RequestedPage() {
                               <CheckCircle size={16} className="text-amber-500" />
                               <span>Remove Requested</span>
                             </button>
-                            <button onClick={() => { setOpenMenuId(null); router.push(`/registration?edit=${c.id}`); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
-                              <Edit3 size={16} className="text-text-tertiary" /><span>Edit</span>
-                            </button>
                             <div className="border-t border-border my-1" />
                             <button onClick={() => deleteCandidate(c.id)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-red-50 transition-colors text-left text-red-600">
                               <Trash2 size={16} /><span>Delete</span>

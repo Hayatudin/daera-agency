@@ -7,6 +7,7 @@ import Badge from '@/components/ui/Badge';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import { Candidate } from '@/types';
+import { cn } from '@/lib/utils';
 
 import { useCandidates } from '@/hooks/useCandidates';
 
@@ -46,6 +47,22 @@ export default function CandidatesPage() {
       if (!res.ok) throw new Error();
       setCandidates(prev => prev.map(c => c.id === id ? { ...c, isRequested: !current } : c));
     } catch { alert('Failed to update status'); }
+  };
+
+  // Update Medical Status
+  const updateMedicalStatus = async (id: string, newStatus: string) => {
+    try {
+      const res = await fetch(`/api/candidates/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ medicalStatus: newStatus }),
+      });
+      if (!res.ok) throw new Error();
+      setCandidates(prev => prev.map(c => c.id === id ? {
+        ...c,
+        personalInfo: { ...c.personalInfo, medicalStatus: newStatus as any }
+      } : c));
+    } catch { alert('Failed to update medical status'); }
   };
 
   // Delete candidate
@@ -256,11 +273,27 @@ export default function CandidatesPage() {
 
                     {/* Medical */}
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {candidate.medicalDocumentUrl ? (
-                        <button onClick={() => setViewDoc(candidate.medicalDocumentUrl!)} className="text-sm text-emerald-600 hover:underline font-medium flex items-center gap-1"><Eye size={14} /> View</button>
-                      ) : (
-                        <span className="text-xs text-text-tertiary">—</span>
-                      )}
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={candidate.personalInfo.medicalStatus || 'Pending'}
+                          onChange={(e) => updateMedicalStatus(candidate.id, e.target.value)}
+                          className={cn(
+                            "text-xs font-bold px-2 py-1 rounded border appearance-none outline-none cursor-pointer",
+                            candidate.personalInfo.medicalStatus === 'Fit' ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
+                            candidate.personalInfo.medicalStatus === 'Unfit' ? "bg-red-50 text-red-700 border-red-200" :
+                            "bg-gray-50 text-gray-600 border-gray-200"
+                          )}
+                        >
+                          <option value="Pending">Pending</option>
+                          <option value="Fit">Fit</option>
+                          <option value="Unfit">Unfit</option>
+                        </select>
+                        {candidate.medicalDocumentUrl && (
+                          <button onClick={() => setViewDoc(candidate.medicalDocumentUrl!)} className="text-sm text-primary hover:text-primary-600 transition-colors" title="View Medical Doc">
+                            <Eye size={16} />
+                          </button>
+                        )}
+                      </div>
                     </td>
 
                     {/* Actions */}
