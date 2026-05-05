@@ -3,13 +3,14 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-interface BadgeProps {
+export interface BadgeProps {
   children: React.ReactNode;
   variant?: 'default' | 'success' | 'warning' | 'danger' | 'info';
   size?: 'sm' | 'md';
+  className?: string;
 }
 
-export default function Badge({ children, variant = 'default', size = 'sm' }: BadgeProps) {
+export default function Badge({ children, variant = 'default', size = 'sm', className }: BadgeProps) {
   const variants = {
     default: 'bg-primary-50 text-primary',
     success: 'bg-success-light text-green-700',
@@ -27,7 +28,8 @@ export default function Badge({ children, variant = 'default', size = 'sm' }: Ba
     <span className={cn(
       'inline-flex items-center font-medium rounded-full',
       variants[variant],
-      sizes[size]
+      sizes[size],
+      className
     )}>
       {children}
     </span>
