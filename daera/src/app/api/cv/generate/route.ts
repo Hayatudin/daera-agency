@@ -299,7 +299,7 @@ export async function POST(request: Request) {
 
     // PDF and JPG conversion using Mammoth + Playwright
     try {
-      const { chromium } = require('playwright');
+      const { chromium } = require(/* webpackIgnore: true */ 'playwright');
       const mammoth = require('mammoth');
 
       const { value: html } = await mammoth.convertToHtml({ buffer: docxBuf });
