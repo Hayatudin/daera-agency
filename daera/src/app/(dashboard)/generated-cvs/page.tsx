@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import {
   FolderOpen, FileText, ChevronRight, ArrowLeft, Download,
   RefreshCw, Trash2, MoreVertical, LayoutTemplate, X, Check, AlertTriangle,
-  FileDown, Image as ImageIcon, ChevronDown
+  FileDown, Image as ImageIcon, ChevronDown, PackageOpen
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Button from '@/components/ui/Button';
@@ -307,6 +307,9 @@ export default function GeneratedCVsPage() {
   const [cvs, setCvs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
+  const [religionFilter, setReligionFilter] = useState<string>('');
+  const [downloadAllOpen, setDownloadAllOpen] = useState(false);
+  const [isDownloadingAll, setIsDownloadingAll] = useState(false);
 
   // Modals
   const [changeTarget, setChangeTarget] = useState<any | null>(null);
@@ -579,29 +582,178 @@ export default function GeneratedCVsPage() {
 
   // ── Folder Detail View ────────────────────────────────────────────────────
   const activeTemplate = TEMPLATES.find(t => t.id === selectedFolder)!;
-  const activeCVs = cvs.filter(c => c.templateId === selectedFolder);
+  const allFolderCVs = cvs.filter(c => c.templateId === selectedFolder);
+  const activeCVs = allFolderCVs.filter(cv => {
+    if (!religionFilter) return true;
+    const rel = (cv.candidate.religion || '').toLowerCase();
+    if (religionFilter === 'muslim') return rel === 'muslim';
+    if (religionFilter === 'non-muslim') return rel !== 'muslim' && rel !== '';
+    return true;
+  });
   const TC = activeTemplate.component;
+
+  // ── Download All as ZIP ────────────────────────────────────────────────────
+  const handleDownloadAll = async (format: 'pdf' | 'jpg') => {
+    if (activeCVs.length === 0) return;
+    setIsDownloadingAll(true);
+    setDownloadAllOpen(false);
+    try {
+      const JSZip = (await import('jszip')).default;
+      const htmlToImage = await import('html-to-image');
+      const zip = new JSZip();
+
+      // Create a hidden container for rendering
+      const container = document.createElement('div');
+      container.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:800px;z-index:-1;';
+      document.body.appendChild(container);
+
+      for (let i = 0; i < activeCVs.length; i++) {
+        const cv = activeCVs[i];
+        const safeName = `${cv.candidate.givenNames}_${cv.candidate.surname}`.replace(/[^a-zA-Z0-9_]/g, '');
+        showToast(`Processing ${i + 1}/${activeCVs.length}: ${cv.candidate.givenNames}...`);
+
+        // Render the CV template into the hidden container
+        const { createRoot } = await import('react-dom/client');
+        const wrapper = document.createElement('div');
+        container.appendChild(wrapper);
+        const root = createRoot(wrapper);
+
+        await new Promise<void>((resolve) => {
+          root.render(
+            React.createElement(TC, {
+              candidate: cv.candidate,
+              facePhoto: cv.facePhotoUrl || cv.candidate.facePhotoUrl || cv.candidate.passportImageUrl,
+              fullBodyPhoto: cv.fullBodyPhotoUrl || cv.candidate.fullBodyPhotoUrl,
+            })
+          );
+          setTimeout(resolve, 500);
+        });
+
+        const origH = wrapper.style.height;
+        const origO = wrapper.style.overflow;
+        wrapper.style.height = 'auto';
+        wrapper.style.overflow = 'visible';
+        const dataUrl = await htmlToImage.toJpeg(wrapper, { quality: 0.92, backgroundColor: '#ffffff', pixelRatio: 2 });
+        wrapper.style.height = origH;
+        wrapper.style.overflow = origO;
+
+        if (format === 'jpg') {
+          const res = await fetch(dataUrl);
+          const blob = await res.blob();
+          zip.file(`${safeName}.jpg`, blob);
+        } else {
+          const { jsPDF } = await import('jspdf');
+          const pdf = new jsPDF('p', 'mm', 'a4');
+          const pdfW = pdf.internal.pageSize.getWidth();
+          const props = pdf.getImageProperties(dataUrl);
+          const totalH = props.height / (props.width / pdfW);
+          pdf.addImage(dataUrl, 'JPEG', 0, 0, pdfW, totalH);
+          if (totalH > pdf.internal.pageSize.getHeight() + 10) {
+            pdf.addPage();
+            pdf.addImage(dataUrl, 'JPEG', 0, -297, pdfW, totalH);
+          }
+          zip.file(`${safeName}.pdf`, pdf.output('blob'));
+        }
+
+        root.unmount();
+        container.removeChild(wrapper);
+      }
+
+      document.body.removeChild(container);
+
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const url = window.URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${activeTemplate.name.replace(/\s+/g, '_')}_CVs${religionFilter ? '_' + religionFilter : ''}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { document.body.removeChild(a); window.URL.revokeObjectURL(url); }, 2000);
+      showToast(`Downloaded ${activeCVs.length} CVs as ZIP!`);
+    } catch (err) {
+      console.error('Download all error:', err);
+      showToast('Failed to download all CVs', 'error');
+    } finally {
+      setIsDownloadingAll(false);
+    }
+  };
 
   return (
     <>
       <div className="space-y-6">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-3">
-          <button onClick={() => setSelectedFolder(null)} className="p-2 rounded-lg hover:bg-surface border border-border transition-colors text-text-secondary hover:text-text-primary">
-            <ArrowLeft size={18} />
-          </button>
-          <div>
-            <div className="flex items-center gap-1.5 text-xs text-text-tertiary mb-0.5">
-              <span className="hover:text-primary cursor-pointer" onClick={() => setSelectedFolder(null)}>Folders</span>
-              <ChevronRight size={12} />
-              <span className="text-text-primary font-medium">{activeTemplate.name}</span>
+        {/* Breadcrumb + Actions */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button onClick={() => { setSelectedFolder(null); setReligionFilter(''); }} className="p-2 rounded-lg hover:bg-surface border border-border transition-colors text-text-secondary hover:text-text-primary">
+              <ArrowLeft size={18} />
+            </button>
+            <div>
+              <div className="flex items-center gap-1.5 text-xs text-text-tertiary mb-0.5">
+                <span className="hover:text-primary cursor-pointer" onClick={() => { setSelectedFolder(null); setReligionFilter(''); }}>Folders</span>
+                <ChevronRight size={12} />
+                <span className="text-text-primary font-medium">{activeTemplate.name}</span>
+              </div>
+              <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
+                {activeTemplate.name}
+                <span className={cn('text-sm font-semibold px-2 py-0.5 rounded-full', activeTemplate.bgLight, activeTemplate.textColor)}>
+                  {activeCVs.length} CV{activeCVs.length !== 1 ? 's' : ''}
+                </span>
+              </h1>
             </div>
-            <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
-              {activeTemplate.name}
-              <span className={cn('text-sm font-semibold px-2 py-0.5 rounded-full', activeTemplate.bgLight, activeTemplate.textColor)}>
-                {activeCVs.length} CV{activeCVs.length !== 1 ? 's' : ''}
-              </span>
-            </h1>
+          </div>
+
+          {/* Right side: Religion filter + Download All */}
+          <div className="flex items-center gap-3">
+            {/* Religion Filter */}
+            <div className="w-44">
+              <select
+                value={religionFilter}
+                onChange={e => setReligionFilter(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer"
+              >
+                <option value="">All Religions</option>
+                <option value="muslim">Muslim</option>
+                <option value="non-muslim">Non-Muslim</option>
+              </select>
+            </div>
+
+            {/* Download All */}
+            <div className="relative">
+              <button
+                onClick={() => setDownloadAllOpen(p => !p)}
+                disabled={activeCVs.length === 0 || isDownloadingAll}
+                className={cn(
+                  'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all border',
+                  activeCVs.length > 0
+                    ? 'bg-primary text-white border-primary hover:bg-primary/90 shadow-md shadow-primary/20'
+                    : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                )}
+              >
+                {isDownloadingAll ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <PackageOpen size={16} />
+                )}
+                {isDownloadingAll ? 'Creating ZIP...' : `Download All (${activeCVs.length})`}
+                <ChevronDown size={14} className={cn('transition-transform', downloadAllOpen && 'rotate-180')} />
+              </button>
+              {downloadAllOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-border rounded-xl shadow-2xl overflow-hidden z-50">
+                  <button
+                    onClick={() => handleDownloadAll('pdf')}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-text-primary hover:bg-surface transition-colors"
+                  >
+                    <FileDown size={14} className="text-red-500" /> Download all as PDF
+                  </button>
+                  <button
+                    onClick={() => handleDownloadAll('jpg')}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-text-primary hover:bg-surface transition-colors border-t border-border"
+                  >
+                    <ImageIcon size={14} className="text-emerald-500" /> Download all as JPG
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -610,9 +762,13 @@ export default function GeneratedCVsPage() {
             <div className="w-16 h-16 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center mb-4">
               <FileText size={28} className="text-gray-300" />
             </div>
-            <h3 className="text-base font-semibold text-text-primary mb-1">This folder is empty</h3>
-            <p className="text-sm text-text-tertiary mb-6 max-w-xs">No CVs generated with {activeTemplate.name} yet.</p>
-            <Link href="/cv-generator"><Button>Generate a CV</Button></Link>
+            <h3 className="text-base font-semibold text-text-primary mb-1">{religionFilter ? 'No matching candidates' : 'This folder is empty'}</h3>
+            <p className="text-sm text-text-tertiary mb-6 max-w-xs">{religionFilter ? `No ${religionFilter} candidates found in ${activeTemplate.name}.` : `No CVs generated with ${activeTemplate.name} yet.`}</p>
+            {religionFilter ? (
+              <Button onClick={() => setReligionFilter('')}>Clear Filter</Button>
+            ) : (
+              <Link href="/cv-generator"><Button>Generate a CV</Button></Link>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

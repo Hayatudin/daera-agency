@@ -67,6 +67,7 @@ export default function ReviewSubmit({ passportData, personalInfo, facePhoto, pa
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <Field label="Passport Number" value={passportData.passportNumber} />
               <Field label="Nationality" value={passportData.nationality} />
+              <Field label="Place of Birth" value={passportData.placeOfBirth || personalInfo.city} />
               <Field label="Date of Birth" value={formatDate(passportData.dateOfBirth)} />
               <Field label="Gender" value={passportData.gender} />
               <Field label="Issue Place" value={passportData.issuingCountry} />

@@ -8,7 +8,6 @@ import {
   Heart, GraduationCap, Globe, Shield, FileText, Eye, Loader2, Clock
 } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
-import { useCandidates } from '@/hooks/useCandidates';
 import { cn } from '@/lib/utils';
 
 export default function CandidateDetailPage() {
@@ -18,16 +17,21 @@ export default function CandidateDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [viewDoc, setViewDoc] = useState<string | null>(null);
 
-
-  const { candidates } = useCandidates();
-
   useEffect(() => {
-    if (candidates.length > 0) {
-      const found = candidates.find(c => c.id === params.id);
-      setCandidate(found || null);
-      setIsLoading(false);
+    async function fetchCandidate() {
+      try {
+        const res = await fetch(`/api/candidates/${params.id}`);
+        if (!res.ok) throw new Error('Not found');
+        const data = await res.json();
+        setCandidate(data);
+      } catch {
+        setCandidate(null);
+      } finally {
+        setIsLoading(false);
+      }
     }
-  }, [params.id, candidates]);
+    if (params.id) fetchCandidate();
+  }, [params.id]);
 
   const handleDelete = async () => {
     if (!candidate) return;
