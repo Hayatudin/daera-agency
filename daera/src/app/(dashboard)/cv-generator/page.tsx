@@ -285,42 +285,6 @@ function CVGeneratorContent() {
             />
           </div>
 
-          {/* Photo Upload Card */}
-          <div className="bg-surface rounded-[1.5rem] border border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Camera size={16} className="text-primary" />
-              <h2 className="font-semibold text-text-primary">Photos</h2>
-            </div>
-            
-            {/* Face photo auto-pulled from profile */}
-            {facePhoto && (
-              <div className="mb-4 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
-                <p className="text-xs text-emerald-700 font-medium mb-2">✓ Face photo loaded from profile</p>
-                <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-emerald-200 mx-auto">
-                  <img src={facePhoto} alt="Face" className="w-full h-full object-cover" />
-                </div>
-              </div>
-            )}
-
-            {/* Full Body Photo auto-pulled from profile */}
-            {fullBodyPhoto && (
-              <div className="p-3 bg-blue-50 rounded-xl border border-blue-100">
-                <p className="text-xs text-blue-700 font-medium mb-2">✓ Full body photo loaded from profile</p>
-                <div className="w-16 h-24 rounded-lg overflow-hidden border-2 border-blue-200 mx-auto">
-                  <img src={fullBodyPhoto} alt="Full Body" className="w-full h-full object-cover" />
-                </div>
-              </div>
-            )}
-
-            {!facePhoto && !fullBodyPhoto && (
-              <div className="p-3 bg-amber-50 rounded-xl border border-amber-100">
-                <p className="text-xs text-amber-700 font-medium">No photos found. Please upload photos in the candidate's registration form first.</p>
-              </div>
-            )}
-          </div>
-
-
-
           {/* Template Selection Card */}
           <div className="bg-surface rounded-[1.5rem] border border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6">
             <TemplateGrid
