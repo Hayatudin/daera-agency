@@ -29,7 +29,7 @@ interface PersonalInfoFormProps {
 export default function PersonalInfoForm({ data, onChange, passportData, onPassportChange, passportImage, onPassportImageChange, facePhoto, onFacePhotoChange, brokers, onBrokerCreate }: PersonalInfoFormProps) {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const faceInputRef = React.useRef<HTMLInputElement>(null);
-  
+
   // Work Experience Handlers
   const addExperience = () => {
     const newExp: WorkExperienceEntry = { experienceStatus: 'Have experience', country: '', yearsOfExperience: '' };
@@ -125,7 +125,7 @@ export default function PersonalInfoForm({ data, onChange, passportData, onPassp
 
   return (
     <div className="space-y-10 animate-slide-in-right max-w-5xl mx-auto">
-      
+
       {/* 1. Personal Information */}
       <section>
         <h3 className="text-xl font-bold text-text-primary mb-6">Personal Information</h3>
@@ -137,7 +137,7 @@ export default function PersonalInfoForm({ data, onChange, passportData, onPassp
             {facePhoto ? (
               <Image src={facePhoto} alt="Profile Photo" fill className="object-cover" />
             ) : (
-              <span className="text-slate-400 text-xs text-center px-2">Profile<br/>Photo</span>
+              <span className="text-slate-400 text-xs text-center px-2">Profile<br />Photo</span>
             )}
           </div>
           <button type="button" onClick={handleFaceClick} className="text-sm text-primary hover:underline font-medium">Change personal photo</button>
@@ -187,31 +187,31 @@ export default function PersonalInfoForm({ data, onChange, passportData, onPassp
           </div>
 
           {/* Row 3 */}
-          <Select label="Job" required options={jobOptions.map(j => ({value: j.toUpperCase(), label: j.toUpperCase()}))} value={data.job} onChange={v => onChange('job', v)} placeholder="Select job" />
-          <MultiSelect label="Education level" options={educationLevels.map(e => ({value: e.toUpperCase(), label: e.toUpperCase()}))} value={selectedEducation} onChange={handleEducationChange} placeholder="Select education" />
-          <MultiSelect label="Skills" options={skillOptions.map(s => ({value: s.toUpperCase(), label: s.toUpperCase()}))} value={data.skills || []} onChange={v => onChange('skills', v)} placeholder="Select skills" />
+          <Select label="Job" required options={jobOptions.map(j => ({ value: j.toUpperCase(), label: j.toUpperCase() }))} value={data.job} onChange={v => onChange('job', v)} placeholder="Select job" />
+          <MultiSelect label="Education level" options={educationLevels.map(e => ({ value: e.toUpperCase(), label: e.toUpperCase() }))} value={selectedEducation} onChange={handleEducationChange} placeholder="Select education" />
+          <MultiSelect label="Skills" options={skillOptions.map(s => ({ value: s.toUpperCase(), label: s.toUpperCase() }))} value={data.skills || []} onChange={v => onChange('skills', v)} placeholder="Select skills" />
 
           {/* Row 4 */}
-          <MultiSelect label="Languages" options={languageOptions.map(l => ({value: l.toUpperCase(), label: l.toUpperCase()}))} value={data.languages || []} onChange={v => onChange('languages', v)} placeholder="Select languages" />
+          <MultiSelect label="Languages" options={languageOptions.map(l => ({ value: l.toUpperCase(), label: l.toUpperCase() }))} value={data.languages || []} onChange={v => onChange('languages', v)} placeholder="Select languages" />
           <Input label="ID Number" value={data.idNumber || passportData.passportNumber} onChange={e => handleChangeUpper('idNumber', e.target.value)} required />
-          
+
           {/* Main Mobile Number */}
           <div className="space-y-2">
             <Input label="Mobile Number" type="tel" value={data.phone} onChange={e => onChange('phone', e.target.value)} placeholder="+251 9..." required />
-            
+
             {/* Additional Mobile Numbers */}
             {(data.additionalPhones || []).map((phone, idx) => (
               <div key={idx} className="flex gap-2 animate-slide-in-right">
                 <div className="flex-1">
-                  <Input 
-                    value={phone} 
-                    onChange={e => updatePhone(idx, e.target.value)} 
-                    placeholder="Another mobile number..." 
+                  <Input
+                    value={phone}
+                    onChange={e => updatePhone(idx, e.target.value)}
+                    placeholder="Another mobile number..."
                     type="tel"
                   />
                 </div>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => removePhone(idx)}
                   className="mt-1 p-2 text-danger hover:bg-red-50 rounded-lg self-start"
                 >
@@ -219,9 +219,9 @@ export default function PersonalInfoForm({ data, onChange, passportData, onPassp
                 </button>
               </div>
             ))}
-            
-            <button 
-              type="button" 
+
+            <button
+              type="button"
               onClick={addPhone}
               className="text-xs text-primary font-medium flex items-center gap-1 hover:underline mt-1"
             >
@@ -232,14 +232,14 @@ export default function PersonalInfoForm({ data, onChange, passportData, onPassp
           {/* Row 5 */}
           <Input label="Number Of Children" type="number" value={String(data.numberOfChildren || '')} onChange={e => onChange('numberOfChildren', parseInt(e.target.value) || 0)} required />
           <Input label="E-Mail" type="email" value={data.email} onChange={e => onChange('email', e.target.value.toLowerCase())} placeholder="email@example.com" required />
-          
+
           {/* Broker Dropdown */}
-          <Select 
-            label="Broker / Source" 
-            options={brokers.map(b => ({ value: b.id, label: b.name }))} 
-            value={data.brokerId || ''} 
-            onChange={v => onChange('brokerId', v)} 
-            placeholder="Select broker" 
+          <Select
+            label="Broker / Source"
+            options={brokers.map(b => ({ value: b.id, label: b.name }))}
+            value={data.brokerId || ''}
+            onChange={v => onChange('brokerId', v)}
+            placeholder="Select broker"
             searchable
             onCreate={onBrokerCreate}
           />
@@ -249,39 +249,39 @@ export default function PersonalInfoForm({ data, onChange, passportData, onPassp
       {/* 2. Work Experience */}
       <section className="pt-4 border-t border-slate-100">
         <h3 className="text-xl font-bold text-text-primary mb-6">Work Experience</h3>
-        
+
         <div className="space-y-6">
           {experiences.map((exp, index) => (
             <div key={index} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6 relative group">
-              <Select 
-                label="Experience" 
-                required 
-                options={[{value:'Have experience', label:'Have experience'}, {value:'New', label:'New'}]} 
-                value={exp.experienceStatus} 
-                onChange={v => updateExperience(index, 'experienceStatus', v)} 
+              <Select
+                label="Experience"
+                required
+                options={[{ value: 'Have experience', label: 'Have experience' }, { value: 'New', label: 'New' }]}
+                value={exp.experienceStatus}
+                onChange={v => updateExperience(index, 'experienceStatus', v)}
               />
-              
+
               {exp.experienceStatus === 'Have experience' && (
                 <>
-                  <Select 
-                    label="Country" 
-                    required 
-                    options={countries.map(c => ({value: c.toUpperCase(), label: c.toUpperCase()}))} 
-                    value={exp.country} 
-                    onChange={v => updateExperience(index, 'country', v)} 
-                    placeholder="Select country" 
+                  <Select
+                    label="Country"
+                    required
+                    options={countries.map(c => ({ value: c.toUpperCase(), label: c.toUpperCase() }))}
+                    value={exp.country}
+                    onChange={v => updateExperience(index, 'country', v)}
+                    placeholder="Select country"
                   />
                   <div className="relative">
-                    <Input 
-                      label="Years Of Experience" 
-                      type="number" 
-                      required 
-                      value={exp.yearsOfExperience} 
-                      onChange={e => updateExperience(index, 'yearsOfExperience', e.target.value)} 
+                    <Input
+                      label="Years Of Experience"
+                      type="number"
+                      required
+                      value={exp.yearsOfExperience}
+                      onChange={e => updateExperience(index, 'yearsOfExperience', e.target.value)}
                     />
                     {experiences.length > 1 && (
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={() => removeExperience(index)}
                         className="absolute right-0 -top-8 text-danger hover:bg-danger/10 p-1.5 rounded-md transition-colors"
                         title="Remove Experience"
@@ -294,9 +294,9 @@ export default function PersonalInfoForm({ data, onChange, passportData, onPassp
               )}
             </div>
           ))}
-          
-          <button 
-            type="button" 
+
+          <button
+            type="button"
             onClick={addExperience}
             className="flex items-center gap-2 text-primary hover:underline text-sm font-medium mt-2"
           >
@@ -308,7 +308,7 @@ export default function PersonalInfoForm({ data, onChange, passportData, onPassp
       {/* 3. Passport */}
       <section className="pt-4 border-t border-slate-100">
         <h3 className="text-xl font-bold text-text-primary mb-6">Passport</h3>
-        
+
         {/* Passport Preview */}
         <div className="flex items-center gap-4 mb-8">
           <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
@@ -324,7 +324,7 @@ export default function PersonalInfoForm({ data, onChange, passportData, onPassp
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
           <Input label="Passport Number" value={passportData.passportNumber} onChange={e => handlePassportChangeUpper('passportNumber', e.target.value)} required />
-          <Input label="Place of Birth" value={passportData.placeOfBirth || data.city} onChange={e => handlePassportChangeUpper('placeOfBirth', e.target.value)} disabled />
+          <Input label="Place of Birth" value={passportData.placeOfBirth || data.city} onChange={e => handlePassportChangeUpper('placeOfBirth', e.target.value)} required />
           <Input label="Passport Issue Place" value={passportData.issuingCountry} onChange={e => handlePassportChangeUpper('issuingCountry', e.target.value)} required />
           <Input label="Passport Issue Date" type="date" value={passportData.dateOfIssue} onChange={e => onPassportChange('dateOfIssue', e.target.value)} required />
           <Input label="Passport Expiry Date" type="date" value={passportData.dateOfExpiry} onChange={e => onPassportChange('dateOfExpiry', e.target.value)} required />
@@ -334,9 +334,9 @@ export default function PersonalInfoForm({ data, onChange, passportData, onPassp
       {/* 4. Address */}
       <section className="pt-4 border-t border-slate-100">
         <h3 className="text-xl font-bold text-text-primary mb-6">Address</h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
-          <Select label="Country" options={countries.map(c => ({value: c.toUpperCase(), label: c.toUpperCase()}))} value={data.country} onChange={v => onChange('country', v)} placeholder="Select country" />
+          <Select label="Country" options={countries.map(c => ({ value: c.toUpperCase(), label: c.toUpperCase() }))} value={data.country} onChange={v => onChange('country', v)} placeholder="Select country" />
           <Input label="City" value={data.city} onChange={e => { handleChangeUpper('city', e.target.value); handlePassportChangeUpper('placeOfBirth', e.target.value); }} required />
           <Input label="Address" value={data.address} onChange={e => handleChangeUpper('address', e.target.value)} required />
         </div>
@@ -345,7 +345,7 @@ export default function PersonalInfoForm({ data, onChange, passportData, onPassp
       {/* 5. Documents */}
       <section className="pt-4 border-t border-slate-100">
         <h3 className="text-xl font-bold text-text-primary mb-6">Documents</h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* COC Document */}
           <div>
@@ -460,7 +460,7 @@ export default function PersonalInfoForm({ data, onChange, passportData, onPassp
       {/* 6. Relative Contact Necessity */}
       <section className="pt-4 border-t border-slate-100">
         <h3 className="text-xl font-bold text-text-primary mb-6">Relative Contact Necessity</h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 max-w-2xl">
           <Input label="Relative name" value={data.emergencyContactName} onChange={e => handleChangeUpper('emergencyContactName', e.target.value)} required />
           <Input label="Relative kinship" value={data.emergencyContactRelation} onChange={e => handleChangeUpper('emergencyContactRelation', e.target.value)} required placeholder="e.g. FATHER" />
