@@ -49,6 +49,9 @@ export interface CandidatePersonalInfo {
   cvDeadline?: string;
   cocDocumentUrl?: string;
   medicalDocumentUrl?: string;
+  candidateIdImageUrl?: string;
+  relativeIdImageUrl?: string;
+  labourIdUrl?: string;
   brokerId?: string;
 }
 
@@ -62,6 +65,9 @@ export interface Candidate {
   fullBodyPhotoUrl: string;
   cocDocumentUrl?: string;
   medicalDocumentUrl?: string;
+  candidateIdImageUrl?: string;
+  relativeIdImageUrl?: string;
+  labourIdUrl?: string;
   isRequested?: boolean;
   registeredAt: string;
   status: 'pending' | 'approved' | 'rejected';

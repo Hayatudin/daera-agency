@@ -1,13 +1,11 @@
 'use client';
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { DownloadFormat, Candidate } from '@/types';
 import CandidateSelector from '@/components/cv-generator/CandidateSelector';
-import FileUpload from '@/components/ui/FileUpload';
-import Input from '@/components/ui/Input';
 import { cn } from '@/lib/utils';
-import { FileText, CheckCircle2, User, Camera, Calendar, Bell, Printer, Download, ChevronDown, FileDown, Image as ImageIcon } from 'lucide-react';
+import { FileText, CheckCircle2, User, Download, ChevronDown, FileDown, Image as ImageIcon, Camera } from 'lucide-react';
 import TemplateGrid from '@/components/cv-generator/TemplateGrid';
 import ALMTemplate from '@/components/cv/templates/ALMTemplate';
 import KA7Template from '@/components/cv/templates/KA7Template';
@@ -37,7 +35,6 @@ function CVGeneratorContent() {
   const { candidates, isLoading, mutate: setCandidates } = useCandidates();
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(urlCandidateId);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('alm');
-  const [fullBodyPhoto, setFullBodyPhoto] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [isDownloadOpen, setIsDownloadOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -57,12 +54,7 @@ function CVGeneratorContent() {
   const selectedCandidate = candidates.find(c => c.id === selectedCandidateId) || null;
 
   const facePhoto = selectedCandidate?.facePhotoUrl || selectedCandidate?.passportImageUrl || null;
-
-  const handleBodyUpload = useCallback((file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => setFullBodyPhoto(e.target?.result as string);
-    reader.readAsDataURL(file);
-  }, []);
+  const fullBodyPhoto = selectedCandidate?.fullBodyPhotoUrl || null;
 
   const handleDownload = async (format: 'pdf' | 'jpg' | 'doc') => {
     if (!cvRef.current || !selectedCandidate) return;
@@ -310,14 +302,21 @@ function CVGeneratorContent() {
               </div>
             )}
 
-            <FileUpload
-              label="Full Body Photo"
-              onFileSelect={handleBodyUpload}
-              preview={fullBodyPhoto}
-              onClear={() => setFullBodyPhoto(null)}
-              compact
-              helperText="Standing pose"
-            />
+            {/* Full Body Photo auto-pulled from profile */}
+            {fullBodyPhoto && (
+              <div className="p-3 bg-blue-50 rounded-xl border border-blue-100">
+                <p className="text-xs text-blue-700 font-medium mb-2">✓ Full body photo loaded from profile</p>
+                <div className="w-16 h-24 rounded-lg overflow-hidden border-2 border-blue-200 mx-auto">
+                  <img src={fullBodyPhoto} alt="Full Body" className="w-full h-full object-cover" />
+                </div>
+              </div>
+            )}
+
+            {!facePhoto && !fullBodyPhoto && (
+              <div className="p-3 bg-amber-50 rounded-xl border border-amber-100">
+                <p className="text-xs text-amber-700 font-medium">No photos found. Please upload photos in the candidate's registration form first.</p>
+              </div>
+            )}
           </div>
 
 

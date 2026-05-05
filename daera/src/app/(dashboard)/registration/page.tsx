@@ -35,6 +35,7 @@ function RegistrationContent() {
   const [step, setStep] = useState<RegistrationStep>(isEditMode ? 2 : 1);
   const [passportImage, setPassportImage] = useState<string | null>(null);
   const [facePhoto, setFacePhoto] = useState<string | null>(null);
+  const [fullBodyPhoto, setFullBodyPhoto] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingComplete, setProcessingComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -219,12 +220,22 @@ function RegistrationContent() {
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true);
+
+      if (!facePhoto || !fullBodyPhoto) {
+        alert('Face Photo and Full Body Photo are required.');
+        setIsSubmitting(false);
+        return;
+      }
+
       const compressedPassport = passportImage ? await compressImage(passportImage, 1200, 0.7) : null;
       const compressedFace = facePhoto ? await compressImage(facePhoto, 800, 0.7) : null;
+      const compressedFullBody = fullBodyPhoto ? await compressImage(fullBodyPhoto, 1200, 0.7) : null;
       const compressedCoc = personalInfo.cocDocumentUrl ? await compressImage(personalInfo.cocDocumentUrl, 1200, 0.7) : null;
       const compressedMedical = personalInfo.medicalDocumentUrl ? await compressImage(personalInfo.medicalDocumentUrl, 1200, 0.7) : null;
+      const compressedCandidateId = personalInfo.candidateIdImageUrl ? await compressImage(personalInfo.candidateIdImageUrl, 1200, 0.7) : null;
+      const compressedRelativeId = personalInfo.relativeIdImageUrl ? await compressImage(personalInfo.relativeIdImageUrl, 1200, 0.7) : null;
 
-      const { cocDocumentUrl, medicalDocumentUrl, ...cleanPersonalInfo } = personalInfo;
+      const { cocDocumentUrl, medicalDocumentUrl, candidateIdImageUrl, relativeIdImageUrl, labourIdUrl, ...cleanPersonalInfo } = personalInfo;
 
       const url = isEditMode ? `/api/candidates/${editId}` : '/api/candidates';
       const method = isEditMode ? 'PUT' : 'POST';
@@ -234,10 +245,17 @@ function RegistrationContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           passportData,
-          personalInfo: { ...cleanPersonalInfo, cocDocumentUrl: compressedCoc, medicalDocumentUrl: compressedMedical },
+          personalInfo: {
+            ...cleanPersonalInfo,
+            cocDocumentUrl: compressedCoc,
+            medicalDocumentUrl: compressedMedical,
+            candidateIdImageUrl: compressedCandidateId,
+            relativeIdImageUrl: compressedRelativeId,
+            labourIdUrl: labourIdUrl || null,
+          },
           passportImageUrl: compressedPassport,
           facePhotoUrl: compressedFace,
-          fullBodyPhotoUrl: '',
+          fullBodyPhotoUrl: compressedFullBody,
           status: 'pending',
         }),
       });
@@ -270,7 +288,7 @@ function RegistrationContent() {
         </p>
         <div className="flex items-center justify-center gap-4">
           <Button variant="outline" onClick={() => {
-            setSubmitted(false); setStep(1); setPassportImage(null); setFacePhoto(null);
+            setSubmitted(false); setStep(1); setPassportImage(null); setFacePhoto(null); setFullBodyPhoto(null);
             setProcessingComplete(false); setPassportData(emptyPassportData);
             setPersonalInfo(emptyPersonalInfo); setMusanedSuccess(false);
             setImportMethod('musaned');
@@ -462,6 +480,8 @@ function RegistrationContent() {
             onFacePhotoChange={setFacePhoto}
             brokers={brokers}
             onBrokerCreate={handleCreateBroker}
+            fullBodyPhoto={fullBodyPhoto}
+            onFullBodyPhotoChange={setFullBodyPhoto}
           />
         )}
 

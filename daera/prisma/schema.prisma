@@ -62,6 +62,9 @@ model Candidate {
   fullBodyPhotoUrl         String?
   cocDocumentUrl           String?
   medicalDocumentUrl       String?
+  candidateIdImageUrl      String?
+  relativeIdImageUrl       String?
+  labourIdUrl              String?
   isRequested              Boolean   @default(false)
   registeredAt             DateTime  @default(now())
   status                   String    @default("pending")

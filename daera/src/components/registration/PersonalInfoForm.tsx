@@ -9,7 +9,7 @@ import { CandidatePersonalInfo, PassportData, WorkExperienceEntry } from '@/type
 import {
   educationLevels, languageOptions, skillOptions, countries
 } from '@/data/mockData';
-import { Plus, Trash2, Calendar } from 'lucide-react';
+import { Plus, Trash2, Calendar, Upload } from 'lucide-react';
 
 const jobOptions = ['House Maid', 'Driver', 'Babysitter', 'Cook', 'Nurse', 'Cleaner', 'Caregiver'];
 
@@ -24,11 +24,14 @@ interface PersonalInfoFormProps {
   onFacePhotoChange?: (url: string) => void;
   brokers: { id: string, name: string }[];
   onBrokerCreate?: (name: string) => void;
+  fullBodyPhoto?: string | null;
+  onFullBodyPhotoChange?: (url: string) => void;
 }
 
-export default function PersonalInfoForm({ data, onChange, passportData, onPassportChange, passportImage, onPassportImageChange, facePhoto, onFacePhotoChange, brokers, onBrokerCreate }: PersonalInfoFormProps) {
+export default function PersonalInfoForm({ data, onChange, passportData, onPassportChange, passportImage, onPassportImageChange, facePhoto, onFacePhotoChange, brokers, onBrokerCreate, fullBodyPhoto, onFullBodyPhotoChange }: PersonalInfoFormProps) {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const faceInputRef = React.useRef<HTMLInputElement>(null);
+  const fullBodyInputRef = React.useRef<HTMLInputElement>(null);
 
   // Work Experience Handlers
   const addExperience = () => {
@@ -130,17 +133,41 @@ export default function PersonalInfoForm({ data, onChange, passportData, onPassp
       <section>
         <h3 className="text-xl font-bold text-text-primary mb-6">Personal Information</h3>
 
-        {/* Profile Placeholder */}
-        <div className="flex items-center gap-4 mb-8">
-          <input type="file" ref={faceInputRef} onChange={handleFaceChange} accept="image/*" className="hidden" />
-          <div className="w-16 h-16 rounded-full bg-slate-200 overflow-hidden flex items-center justify-center border-2 border-primary/20 relative">
-            {facePhoto ? (
-              <Image src={facePhoto} alt="Profile Photo" fill className="object-cover" />
-            ) : (
-              <span className="text-slate-400 text-xs text-center px-2">Profile<br />Photo</span>
-            )}
+        {/* Profile Photos - Face & Full Body */}
+        <div className="flex items-start gap-8 mb-8">
+          {/* Face Photo */}
+          <div className="flex flex-col items-center gap-2">
+            <input type="file" ref={faceInputRef} onChange={handleFaceChange} accept="image/*" className="hidden" />
+            <div className="w-20 h-20 rounded-full bg-slate-200 overflow-hidden flex items-center justify-center border-2 border-primary/20 relative cursor-pointer" onClick={handleFaceClick}>
+              {facePhoto ? (
+                <Image src={facePhoto} alt="Profile Photo" fill className="object-cover" />
+              ) : (
+                <span className="text-slate-400 text-xs text-center px-2">Profile<br />Photo</span>
+              )}
+            </div>
+            <button type="button" onClick={handleFaceClick} className="text-xs text-primary hover:underline font-medium">Face Photo <span className="text-danger">*</span></button>
           </div>
-          <button type="button" onClick={handleFaceClick} className="text-sm text-primary hover:underline font-medium">Change personal photo</button>
+
+          {/* Full Body Photo */}
+          <div className="flex flex-col items-center gap-2">
+            <input type="file" ref={fullBodyInputRef} onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                if (file.size > 10 * 1024 * 1024) { alert('Max file size is 10MB'); return; }
+                const reader = new FileReader();
+                reader.onload = (ev) => { if (ev.target?.result && onFullBodyPhotoChange) onFullBodyPhotoChange(ev.target.result as string); };
+                reader.readAsDataURL(file);
+              }
+            }} accept="image/*" className="hidden" />
+            <div className="w-20 h-28 rounded-xl bg-slate-200 overflow-hidden flex items-center justify-center border-2 border-primary/20 relative cursor-pointer" onClick={() => fullBodyInputRef.current?.click()}>
+              {fullBodyPhoto ? (
+                <Image src={fullBodyPhoto} alt="Full Body" fill className="object-cover" />
+              ) : (
+                <span className="text-slate-400 text-xs text-center px-2">Full<br />Body</span>
+              )}
+            </div>
+            <button type="button" onClick={() => fullBodyInputRef.current?.click()} className="text-xs text-primary hover:underline font-medium">Full Body <span className="text-danger">*</span></button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
@@ -450,6 +477,90 @@ export default function PersonalInfoForm({ data, onChange, passportData, onPassp
                   </div>
                   <p className="text-sm font-medium text-text-primary">Click to upload Medical</p>
                   <p className="text-xs text-text-tertiary mt-1">Image or PDF — Max 10MB</p>
+                </label>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5b. ID Documents */}
+      <section className="pt-4 border-t border-slate-100">
+        <h3 className="text-xl font-bold text-text-primary mb-6">ID Documents</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Candidate ID Image */}
+          <div>
+            <label className="text-sm font-medium text-text-secondary block mb-2">Candidate ID Image</label>
+            <div className="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary/40 transition-colors">
+              {data.candidateIdImageUrl ? (
+                <div className="space-y-3">
+                  <div className="w-full h-32 rounded-lg overflow-hidden bg-slate-100 relative">
+                    {data.candidateIdImageUrl.startsWith('data:image') ? (
+                      <Image src={data.candidateIdImageUrl} alt="Candidate ID" fill className="object-contain" />
+                    ) : (
+                      <div className="flex items-center justify-center h-full"><div className="text-center"><div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-2"><Upload size={18} className="text-blue-600" /></div><p className="text-xs text-text-secondary font-medium">Uploaded</p></div></div>
+                    )}
+                  </div>
+                  <button type="button" onClick={() => onChange('candidateIdImageUrl', '')} className="text-xs text-danger hover:underline font-medium">Remove</button>
+                </div>
+              ) : (
+                <label className="cursor-pointer block">
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) { if (file.size > 10*1024*1024) { alert('Max 10MB'); return; } const reader = new FileReader(); reader.onload = (ev) => { if (ev.target?.result) onChange('candidateIdImageUrl', ev.target.result as string); }; reader.readAsDataURL(file); }}} />
+                  <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-2"><Upload size={18} className="text-blue-600" /></div>
+                  <p className="text-xs font-medium text-text-primary">Upload Candidate ID</p>
+                  <p className="text-[10px] text-text-tertiary mt-1">Image — Max 10MB</p>
+                </label>
+              )}
+            </div>
+          </div>
+
+          {/* Relative ID Image */}
+          <div>
+            <label className="text-sm font-medium text-text-secondary block mb-2">Relative ID Image</label>
+            <div className="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary/40 transition-colors">
+              {data.relativeIdImageUrl ? (
+                <div className="space-y-3">
+                  <div className="w-full h-32 rounded-lg overflow-hidden bg-slate-100 relative">
+                    {data.relativeIdImageUrl.startsWith('data:image') ? (
+                      <Image src={data.relativeIdImageUrl} alt="Relative ID" fill className="object-contain" />
+                    ) : (
+                      <div className="flex items-center justify-center h-full"><div className="text-center"><div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center mx-auto mb-2"><Upload size={18} className="text-amber-600" /></div><p className="text-xs text-text-secondary font-medium">Uploaded</p></div></div>
+                    )}
+                  </div>
+                  <button type="button" onClick={() => onChange('relativeIdImageUrl', '')} className="text-xs text-danger hover:underline font-medium">Remove</button>
+                </div>
+              ) : (
+                <label className="cursor-pointer block">
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) { if (file.size > 10*1024*1024) { alert('Max 10MB'); return; } const reader = new FileReader(); reader.onload = (ev) => { if (ev.target?.result) onChange('relativeIdImageUrl', ev.target.result as string); }; reader.readAsDataURL(file); }}} />
+                  <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center mx-auto mb-2"><Upload size={18} className="text-amber-600" /></div>
+                  <p className="text-xs font-medium text-text-primary">Upload Relative ID</p>
+                  <p className="text-[10px] text-text-tertiary mt-1">Image — Max 10MB</p>
+                </label>
+              )}
+            </div>
+          </div>
+
+          {/* Labour ID (PDF) */}
+          <div>
+            <label className="text-sm font-medium text-text-secondary block mb-2">Labour ID (PDF)</label>
+            <div className="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary/40 transition-colors">
+              {data.labourIdUrl ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-center h-32">
+                    <div className="text-center">
+                      <div className="w-10 h-10 bg-violet-50 rounded-xl flex items-center justify-center mx-auto mb-2"><svg className="w-5 h-5 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div>
+                      <p className="text-xs text-text-secondary font-medium">PDF Uploaded</p>
+                    </div>
+                  </div>
+                  <button type="button" onClick={() => onChange('labourIdUrl', '')} className="text-xs text-danger hover:underline font-medium">Remove</button>
+                </div>
+              ) : (
+                <label className="cursor-pointer block">
+                  <input type="file" accept=".pdf,application/pdf" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) { if (file.size > 10*1024*1024) { alert('Max 10MB'); return; } const reader = new FileReader(); reader.onload = (ev) => { if (ev.target?.result) onChange('labourIdUrl', ev.target.result as string); }; reader.readAsDataURL(file); }}} />
+                  <div className="w-10 h-10 bg-violet-50 rounded-xl flex items-center justify-center mx-auto mb-2"><svg className="w-5 h-5 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div>
+                  <p className="text-xs font-medium text-text-primary">Upload Labour ID</p>
+                  <p className="text-[10px] text-text-tertiary mt-1">PDF only — Max 10MB</p>
                 </label>
               )}
             </div>

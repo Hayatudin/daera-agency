@@ -91,6 +91,9 @@ export async function GET(
       fullBodyPhotoUrl: c.fullBodyPhotoUrl || '',
       cocDocumentUrl: c.cocDocumentUrl || '',
       medicalDocumentUrl: c.medicalDocumentUrl || '',
+      candidateIdImageUrl: c.candidateIdImageUrl || '',
+      relativeIdImageUrl: c.relativeIdImageUrl || '',
+      labourIdUrl: c.labourIdUrl || '',
       status: c.status,
       isRequested: c.isRequested,
       registeredAt: c.registeredAt.toISOString(),
@@ -117,13 +120,19 @@ export async function PUT(
       facePhotoUrl,
       fullBodyPhotoUrl,
       cocDocumentUrl,
-      medicalDocumentUrl
+      medicalDocumentUrl,
+      candidateIdImageUrl,
+      relativeIdImageUrl,
+      labourIdUrl
     ] = await Promise.all([
       uploadToCloudinary(body.passportImageUrl, 'passports'),
       uploadToCloudinary(body.facePhotoUrl, 'faces'),
       uploadToCloudinary(body.fullBodyPhotoUrl, 'fullbody'),
       uploadToCloudinary(body.personalInfo.cocDocumentUrl, 'coc'),
-      uploadToCloudinary(body.personalInfo.medicalDocumentUrl, 'medical')
+      uploadToCloudinary(body.personalInfo.medicalDocumentUrl, 'medical'),
+      uploadToCloudinary(body.personalInfo.candidateIdImageUrl, 'candidate-id'),
+      uploadToCloudinary(body.personalInfo.relativeIdImageUrl, 'relative-id'),
+      uploadToCloudinary(body.personalInfo.labourIdUrl, 'labour-id')
     ]);
 
     const candidate = await prisma.candidate.update({
@@ -175,6 +184,9 @@ export async function PUT(
         ...(fullBodyPhotoUrl && { fullBodyPhotoUrl }),
         ...(cocDocumentUrl && { cocDocumentUrl }),
         ...(medicalDocumentUrl && { medicalDocumentUrl }),
+        ...(candidateIdImageUrl && { candidateIdImageUrl }),
+        ...(relativeIdImageUrl && { relativeIdImageUrl }),
+        ...(labourIdUrl && { labourIdUrl }),
       },
     });
 

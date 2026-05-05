@@ -593,7 +593,7 @@ export default function GeneratedCVsPage() {
   const TC = activeTemplate.component;
 
   // ── Download All as ZIP ────────────────────────────────────────────────────
-  const handleDownloadAll = async (format: 'pdf' | 'jpg') => {
+  const handleDownloadAll = async (format: 'pdf' | 'jpg' | 'doc') => {
     if (activeCVs.length === 0) return;
     setIsDownloadingAll(true);
     setDownloadAllOpen(false);
@@ -637,7 +637,25 @@ export default function GeneratedCVsPage() {
         wrapper.style.height = origH;
         wrapper.style.overflow = origO;
 
-        if (format === 'jpg') {
+        if (format === 'doc') {
+          // DOCX via server-side API
+          const payload = {
+            candidateId: cv.candidateId,
+            templateId: `tmpl-${selectedFolder}`,
+            format: 'doc',
+            deadline: cv.candidate.cvDeadline || new Date().toISOString().split('T')[0],
+            facePhoto: cv.facePhotoUrl || cv.candidate.facePhotoUrl || cv.candidate.passportImageUrl,
+            fullBodyPhoto: cv.fullBodyPhotoUrl || cv.candidate.fullBodyPhotoUrl
+          };
+          const response = await fetch('/api/cv/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!response.ok) throw new Error('DOCX generation failed');
+          const blob = await response.blob();
+          zip.file(`${safeName}.docx`, blob);
+        } else if (format === 'jpg') {
           const res = await fetch(dataUrl);
           const blob = await res.blob();
           zip.file(`${safeName}.jpg`, blob);
@@ -738,18 +756,24 @@ export default function GeneratedCVsPage() {
                 <ChevronDown size={14} className={cn('transition-transform', downloadAllOpen && 'rotate-180')} />
               </button>
               {downloadAllOpen && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-border rounded-xl shadow-2xl overflow-hidden z-50">
+                <div className="absolute right-0 top-full mt-2 w-52 bg-white border border-border rounded-xl shadow-2xl overflow-hidden z-50">
                   <button
                     onClick={() => handleDownloadAll('pdf')}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-text-primary hover:bg-surface transition-colors"
+                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-text-primary hover:bg-surface transition-colors whitespace-nowrap"
                   >
-                    <FileDown size={14} className="text-red-500" /> Download all as PDF
+                    <FileDown size={14} className="text-red-500 shrink-0" /> All as PDF
                   </button>
                   <button
                     onClick={() => handleDownloadAll('jpg')}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-text-primary hover:bg-surface transition-colors border-t border-border"
+                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-text-primary hover:bg-surface transition-colors border-t border-border whitespace-nowrap"
                   >
-                    <ImageIcon size={14} className="text-emerald-500" /> Download all as JPG
+                    <ImageIcon size={14} className="text-emerald-500 shrink-0" /> All as JPG
+                  </button>
+                  <button
+                    onClick={() => handleDownloadAll('doc')}
+                    className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-text-primary hover:bg-surface transition-colors border-t border-border whitespace-nowrap"
+                  >
+                    <FileText size={14} className="text-blue-500 shrink-0" /> All as DOCX
                   </button>
                 </div>
               )}

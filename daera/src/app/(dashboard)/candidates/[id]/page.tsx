@@ -349,6 +349,24 @@ export default function CandidateDetailPage() {
                   <button onClick={() => setViewDoc(c.passportImageUrl!)} className="text-[11px] uppercase tracking-[0.1em] text-primary hover:text-indigo-800 font-black px-3 py-1.5 bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors flex items-center gap-1.5"><Eye size={12} /> View</button>
                 ) : <span className="text-[11px] uppercase tracking-[0.1em] font-bold text-text-tertiary">Not uploaded</span>}
               </div>
+              <div className="flex items-center justify-between p-4 bg-gray-50/80 rounded-[1.25rem] border border-transparent hover:border-gray-200/50 transition-colors">
+                <span className="text-[14px] font-bold text-text-primary">Candidate ID</span>
+                {c.candidateIdImageUrl ? (
+                  <button onClick={() => setViewDoc(c.candidateIdImageUrl!)} className="text-[11px] uppercase tracking-[0.1em] text-blue-600 hover:text-blue-800 font-black px-3 py-1.5 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors flex items-center gap-1.5"><Eye size={12} /> View</button>
+                ) : <span className="text-[11px] uppercase tracking-[0.1em] font-bold text-text-tertiary">Not uploaded</span>}
+              </div>
+              <div className="flex items-center justify-between p-4 bg-gray-50/80 rounded-[1.25rem] border border-transparent hover:border-gray-200/50 transition-colors">
+                <span className="text-[14px] font-bold text-text-primary">Relative ID</span>
+                {c.relativeIdImageUrl ? (
+                  <button onClick={() => setViewDoc(c.relativeIdImageUrl!)} className="text-[11px] uppercase tracking-[0.1em] text-amber-600 hover:text-amber-800 font-black px-3 py-1.5 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors flex items-center gap-1.5"><Eye size={12} /> View</button>
+                ) : <span className="text-[11px] uppercase tracking-[0.1em] font-bold text-text-tertiary">Not uploaded</span>}
+              </div>
+              <div className="flex items-center justify-between p-4 bg-gray-50/80 rounded-[1.25rem] border border-transparent hover:border-gray-200/50 transition-colors">
+                <span className="text-[14px] font-bold text-text-primary">Labour ID</span>
+                {c.labourIdUrl ? (
+                  <button onClick={() => setViewDoc(c.labourIdUrl!)} className="text-[11px] uppercase tracking-[0.1em] text-violet-600 hover:text-violet-800 font-black px-3 py-1.5 bg-violet-100 hover:bg-violet-200 rounded-lg transition-colors flex items-center gap-1.5"><Eye size={12} /> View</button>
+                ) : <span className="text-[11px] uppercase tracking-[0.1em] font-bold text-text-tertiary">Not uploaded</span>}
+              </div>
             </div>
           </div>
 

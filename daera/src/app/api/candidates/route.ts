@@ -83,6 +83,9 @@ export async function GET() {
       fullBodyPhotoUrl: c.fullBodyPhotoUrl || '',
       cocDocumentUrl: c.cocDocumentUrl || '',
       medicalDocumentUrl: c.medicalDocumentUrl || '',
+      candidateIdImageUrl: c.candidateIdImageUrl || '',
+      relativeIdImageUrl: c.relativeIdImageUrl || '',
+      labourIdUrl: c.labourIdUrl || '',
       isRequested: c.isRequested || false,
       registeredAt: c.registeredAt.toISOString(),
       status: c.status,
@@ -106,6 +109,9 @@ export async function POST(request: Request) {
       fullBodyPhotoUrl,
       cocDocumentUrl,
       medicalDocumentUrl,
+      candidateIdImageUrl,
+      relativeIdImageUrl,
+      labourIdUrl,
       count
     ] = await Promise.all([
       uploadToCloudinary(body.passportImageUrl, 'passports'),
@@ -113,6 +119,9 @@ export async function POST(request: Request) {
       uploadToCloudinary(body.fullBodyPhotoUrl, 'fullbody'),
       uploadToCloudinary(body.personalInfo.cocDocumentUrl, 'coc'),
       uploadToCloudinary(body.personalInfo.medicalDocumentUrl, 'medical'),
+      uploadToCloudinary(body.personalInfo.candidateIdImageUrl, 'candidate-id'),
+      uploadToCloudinary(body.personalInfo.relativeIdImageUrl, 'relative-id'),
+      uploadToCloudinary(body.personalInfo.labourIdUrl, 'labour-id'),
       prisma.candidate.count()
     ]);
 
@@ -169,6 +178,9 @@ export async function POST(request: Request) {
         fullBodyPhotoUrl,
         cocDocumentUrl,
         medicalDocumentUrl,
+        candidateIdImageUrl,
+        relativeIdImageUrl,
+        labourIdUrl,
         status: body.status || 'pending',
       },
     });
