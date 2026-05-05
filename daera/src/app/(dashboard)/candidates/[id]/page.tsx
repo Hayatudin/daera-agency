@@ -17,9 +17,7 @@ export default function CandidateDetailPage() {
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [viewDoc, setViewDoc] = useState<string | null>(null);
-  const [isEditingDeadline, setIsEditingDeadline] = useState(false);
-  const [newDeadline, setNewDeadline] = useState('');
-  const [isSavingDeadline, setIsSavingDeadline] = useState(false);
+
 
   const { candidates } = useCandidates();
 
@@ -40,24 +38,7 @@ export default function CandidateDetailPage() {
     } catch { alert('Failed to delete'); }
   };
 
-  const handleSaveDeadline = async () => {
-    if (!newDeadline || !candidate) return;
-    setIsSavingDeadline(true);
-    try {
-      const res = await fetch(`/api/candidates/${candidate.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cvDeadline: new Date(newDeadline).toISOString() }),
-      });
-      if (!res.ok) throw new Error();
-      setCandidate({ ...candidate, cvDeadline: new Date(newDeadline).toISOString() });
-      setIsEditingDeadline(false);
-    } catch {
-      alert('Failed to save deadline');
-    } finally {
-      setIsSavingDeadline(false);
-    }
-  };
+
 
   if (isLoading) {
     return (
@@ -277,55 +258,54 @@ export default function CandidateDetailPage() {
 
         {/* Right Column */}
         <div className="space-y-6">
-          {/* CV Deadline */}
+          {/* Broker Details */}
           <div className="bg-surface rounded-[2rem] border border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8">
             <h2 className="text-lg font-bold text-text-primary mb-6 flex items-center gap-2">
-              <Clock size={20} className="text-amber-500" /> CV Deadline
+              <User size={20} className="text-primary" /> Broker Details
             </h2>
-            {isEditingDeadline ? (
+            {c.broker ? (
               <div className="flex flex-col gap-3">
-                <input
-                  type="date"
-                  value={newDeadline}
-                  onChange={(e) => setNewDeadline(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-[15px] font-semibold text-text-primary focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-colors"
-                />
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleSaveDeadline}
-                    disabled={isSavingDeadline || !newDeadline}
-                    className="flex-1 py-2.5 bg-amber-500 text-white rounded-xl text-sm font-bold hover:bg-amber-600 transition-colors disabled:opacity-50"
-                  >
-                    {isSavingDeadline ? <Loader2 size={16} className="animate-spin mx-auto" /> : 'Save'}
-                  </button>
-                  <button
-                    onClick={() => setIsEditingDeadline(false)}
-                    className="flex-1 py-2.5 bg-gray-100 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-200 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : c.cvDeadline ? (
-              <div className="flex items-center justify-between p-4 bg-amber-50/50 rounded-[1.25rem] border border-amber-100/50">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-amber-100 text-amber-600 rounded-xl">
-                    <Calendar size={18} />
+                <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-[1.25rem] border border-primary/10">
+                  <div className="p-2.5 bg-primary/10 text-primary rounded-xl">
+                    <User size={18} />
                   </div>
                   <div>
-                    <p className="text-[10px] text-amber-700/70 uppercase tracking-[0.1em] font-bold">Deadline Date</p>
-                    <span className="text-[15px] font-bold text-amber-800">{new Date(c.cvDeadline).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                    <p className="text-[10px] text-primary/70 uppercase tracking-[0.1em] font-bold">Broker Name</p>
+                    <span className="text-[15px] font-bold text-primary">{c.broker.name}</span>
                   </div>
                 </div>
-                <button onClick={() => { setNewDeadline(c.cvDeadline ? new Date(c.cvDeadline).toISOString().split('T')[0] : ''); setIsEditingDeadline(true); }} className="text-[11px] uppercase tracking-[0.1em] text-amber-600 hover:text-amber-800 font-black px-3 py-1.5 bg-amber-100/50 hover:bg-amber-100 rounded-lg transition-colors">Edit</button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3 p-4 bg-gray-50/80 rounded-[1.25rem] border border-gray-100">
+                <p className="text-text-tertiary text-[15px] font-semibold">No broker assigned</p>
+              </div>
+            )}
+          </div>
+
+          {/* Generated CV */}
+          <div className="bg-surface rounded-[2rem] border border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8">
+            <h2 className="text-lg font-bold text-text-primary mb-6 flex items-center gap-2">
+              <FileText size={20} className="text-emerald-500" /> Generated CV
+            </h2>
+            {c.latestCVTemplate ? (
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3 p-4 bg-emerald-50/50 rounded-[1.25rem] border border-emerald-100/50">
+                  <div className="p-2.5 bg-emerald-100 text-emerald-600 rounded-xl">
+                    <FileText size={18} />
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-emerald-700/70 uppercase tracking-[0.1em] font-bold">Template Layout</p>
+                    <span className="text-[15px] font-bold text-emerald-800 uppercase">{c.latestCVTemplate}</span>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-3 p-4 bg-gray-50/80 rounded-[1.25rem] border border-gray-100">
-                  <p className="text-text-tertiary text-[15px] font-semibold">No deadline set</p>
+                  <p className="text-text-tertiary text-[15px] font-semibold">No CV generated yet</p>
                 </div>
-                <button onClick={() => setIsEditingDeadline(true)} className="w-full py-3 bg-amber-100 text-amber-800 rounded-xl text-sm font-bold hover:bg-amber-200 transition-colors">
-                  Set Deadline
+                <button onClick={() => router.push(`/cv-generator?candidateId=${c.id}`)} className="w-full py-3 bg-emerald-100 text-emerald-800 rounded-xl text-sm font-bold hover:bg-emerald-200 transition-colors">
+                  Generate CV
                 </button>
               </div>
             )}

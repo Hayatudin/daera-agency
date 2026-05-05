@@ -99,12 +99,31 @@ export default function CandidatesPage() {
   return (
     <div className="space-y-6 animate-fade-in pb-10">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-text-primary flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-primary-50"><Users size={22} className="text-primary" /></div>
-          Candidates Directory
-        </h1>
-        <p className="text-text-secondary mt-1 ml-12">Manage and track all registered candidates</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-text-primary flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-primary-50"><Users size={22} className="text-primary" /></div>
+            Candidates Directory
+          </h1>
+          <p className="text-text-secondary mt-1 ml-12">Manage and track all registered candidates</p>
+        </div>
+        
+        {/* Dynamic Counter */}
+        {!isLoading && !error && (
+          <div className="flex items-center gap-2 px-4 py-2 bg-primary/5 rounded-xl border border-primary/10 self-start md:self-auto">
+            <span className="text-2xl font-black text-primary leading-none">{filtered.length}</span>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-primary/60 leading-none mb-0.5">Showing</span>
+              <span className="text-xs font-semibold text-primary leading-none">Candidates</span>
+            </div>
+            {filtered.length !== candidates.length && (
+              <div className="ml-3 pl-3 border-l border-primary/20">
+                <span className="text-[10px] font-bold text-primary/60 uppercase tracking-wider">Total</span>
+                <p className="text-sm font-black text-primary/80 leading-none">{candidates.length}</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Filters */}

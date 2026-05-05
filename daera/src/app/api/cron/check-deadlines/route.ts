@@ -43,6 +43,14 @@ export async function GET() {
                       `_Please ensure the final document has been exported and sent to the agency._`;
 
       try {
+        await prisma.notification.create({
+          data: {
+            title: 'CV Deadline Reached',
+            message: `The 30-day CV deadline for ${candidate.givenNames} ${candidate.surname} (${candidate.passportNumber}) has been reached. Please ensure the final document is exported.`,
+            candidateId: candidate.id
+          }
+        });
+
         const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
           method: 'POST',
           headers: {

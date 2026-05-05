@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Bell, ChevronDown, User, FileText, X, Loader2 } from 'lucide-react';
+import { Search, Bell, ChevronDown, User, FileText, X, Loader2, CheckCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function Topbar() {
@@ -12,16 +12,54 @@ export default function Topbar() {
   const [isSearching, setIsSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setShowResults(false);
       }
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const res = await fetch('/api/notifications');
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setNotifications(data);
+          setUnreadCount(data.filter((n: any) => !n.isRead).length);
+        }
+      } catch (err) {
+        console.error('Failed to fetch notifications', err);
+      }
+    };
+    fetchNotifications();
+  }, []);
+
+  const markAllRead = async () => {
+    try {
+      await fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ markAllRead: true }),
+      });
+      setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -139,10 +177,77 @@ export default function Topbar() {
       {/* Right side */}
       <div className="flex items-center gap-4">
         {/* Notification */}
-        <button className="relative p-2.5 rounded-xl hover:bg-primary/5 transition-all duration-200 group">
-          <Bell size={20} className="text-text-secondary group-hover:text-primary transition-colors" />
-          <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-danger rounded-full ring-4 ring-white" />
-        </button>
+        <div className="relative" ref={notifRef}>
+          <button 
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="relative p-2.5 rounded-xl hover:bg-primary/5 transition-all duration-200 group"
+          >
+            <Bell size={20} className="text-text-secondary group-hover:text-primary transition-colors" />
+            {unreadCount > 0 && (
+              <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-danger rounded-full ring-4 ring-white flex items-center justify-center">
+              </span>
+            )}
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-danger text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center shadow-sm">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
+          </button>
+
+          {showNotifications && (
+            <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl border border-border shadow-2xl shadow-primary/10 overflow-hidden animate-slide-in-top z-50">
+              <div className="p-4 border-b border-border flex items-center justify-between bg-gray-50/50">
+                <h3 className="font-bold text-text-primary">Notifications</h3>
+                {unreadCount > 0 && (
+                  <button 
+                    onClick={markAllRead}
+                    className="text-[10px] uppercase tracking-wider font-bold text-primary hover:text-indigo-700 flex items-center gap-1 bg-primary/10 px-2 py-1 rounded-md"
+                  >
+                    <CheckCheck size={12} /> Mark all read
+                  </button>
+                )}
+              </div>
+              <div className="max-h-[300px] overflow-y-auto">
+                {notifications.length > 0 ? (
+                  notifications.map((notif) => (
+                    <div 
+                      key={notif.id} 
+                      className={cn(
+                        "p-4 border-b border-border/50 hover:bg-gray-50 transition-colors cursor-pointer",
+                        !notif.isRead ? "bg-primary/5" : ""
+                      )}
+                      onClick={() => {
+                        if (notif.candidateId) router.push(`/candidates/${notif.candidateId}`);
+                        setShowNotifications(false);
+                      }}
+                    >
+                      <div className="flex gap-3">
+                        <div className={cn("mt-0.5 w-2 h-2 rounded-full shrink-0", !notif.isRead ? "bg-primary" : "bg-transparent")} />
+                        <div>
+                          <p className={cn("text-sm mb-1", !notif.isRead ? "font-bold text-text-primary" : "font-medium text-text-secondary")}>
+                            {notif.title}
+                          </p>
+                          <p className="text-xs text-text-tertiary leading-relaxed line-clamp-2">
+                            {notif.message}
+                          </p>
+                          <p className="text-[10px] text-text-tertiary/70 mt-2 font-medium">
+                            {new Date(notif.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-8 text-center">
+                    <Bell size={24} className="mx-auto text-text-tertiary opacity-20 mb-3" />
+                    <p className="text-sm font-bold text-text-primary">All caught up!</p>
+                    <p className="text-xs text-text-tertiary mt-1">No new notifications</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* User menu */}
         <div className="flex items-center gap-3 pl-4 border-l border-border/50 cursor-pointer hover:bg-gray-50 rounded-2xl px-4 py-2 transition-all duration-200 group">

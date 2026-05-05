@@ -65,6 +65,26 @@ function RegistrationContent() {
     fetchBrokers();
   }, []);
 
+  const handleCreateBroker = async (name: string) => {
+    try {
+      const res = await fetch('/api/brokers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name })
+      });
+      if (res.ok) {
+        const newBroker = await res.json();
+        setBrokers(prev => [...prev, newBroker].sort((a, b) => a.name.localeCompare(b.name)));
+        setPersonalInfo(prev => ({ ...prev, brokerId: newBroker.id }));
+      } else {
+        alert('Failed to create broker');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error creating broker');
+    }
+  };
+
   const { candidates } = useCandidates();
 
   useEffect(() => {
@@ -441,6 +461,7 @@ function RegistrationContent() {
             facePhoto={facePhoto}
             onFacePhotoChange={setFacePhoto}
             brokers={brokers}
+            onBrokerCreate={handleCreateBroker}
           />
         )}
 

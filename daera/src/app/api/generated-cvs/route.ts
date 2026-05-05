@@ -77,15 +77,25 @@ export async function POST(request: Request) {
       uploadToCloudinary(fullBodyPhotoUrl, 'fullbody')
     ]);
 
-    // Create new generated CV record
-    const generatedCV = await prisma.generatedCV.create({
-      data: {
-        candidateId,
-        templateId,
-        facePhotoUrl: faceUrl,
-        fullBodyPhotoUrl: fullBodyUrl
-      }
-    });
+    // Auto-set deadline to 30 days from now
+    const deadline = new Date();
+    deadline.setDate(deadline.getDate() + 30);
+
+    // Create new generated CV record and update candidate deadline
+    const [generatedCV] = await prisma.$transaction([
+      prisma.generatedCV.create({
+        data: {
+          candidateId,
+          templateId,
+          facePhotoUrl: faceUrl,
+          fullBodyPhotoUrl: fullBodyUrl
+        }
+      }),
+      prisma.candidate.update({
+        where: { id: candidateId },
+        data: { cvDeadline: deadline }
+      })
+    ]);
     
     return NextResponse.json(generatedCV);
   } catch (error) {

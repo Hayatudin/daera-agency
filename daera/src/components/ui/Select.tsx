@@ -19,6 +19,7 @@ interface SelectProps {
   disabled?: boolean;
   searchable?: boolean;
   required?: boolean;
+  onCreate?: (value: string) => void;
 }
 
 export default function Select({
@@ -31,6 +32,7 @@ export default function Select({
   disabled = false,
   searchable = false,
   required = false,
+  onCreate,
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -102,7 +104,23 @@ export default function Select({
             )}
             <div className="max-h-48 overflow-y-auto py-1">
               {filteredOptions.length === 0 ? (
-                <div className="px-4 py-2 text-sm text-text-tertiary">No options found</div>
+                <div className="px-4 py-2 text-sm text-text-tertiary">
+                  {search && onCreate ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onCreate(search);
+                        setIsOpen(false);
+                        setSearch('');
+                      }}
+                      className="text-primary hover:underline font-medium text-left w-full"
+                    >
+                      + Add "{search}"
+                    </button>
+                  ) : (
+                    "No options found"
+                  )}
+                </div>
               ) : (
                 filteredOptions.map((option) => (
                   <button
@@ -123,6 +141,19 @@ export default function Select({
                     {value === option.value && <Check size={14} className="text-primary" />}
                   </button>
                 ))
+              )}
+              {filteredOptions.length > 0 && search && onCreate && !options.some(o => o.label.toLowerCase() === search.toLowerCase()) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onCreate(search);
+                    setIsOpen(false);
+                    setSearch('');
+                  }}
+                  className="w-full flex items-center justify-between px-4 py-2 text-sm text-left cursor-pointer hover:bg-primary-50 transition-colors duration-150 text-primary font-medium border-t border-border mt-1 pt-2"
+                >
+                  + Add "{search}"
+                </button>
               )}
             </div>
           </div>

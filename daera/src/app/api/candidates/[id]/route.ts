@@ -30,7 +30,13 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const c = await prisma.candidate.findUnique({ where: { id } });
+    const c = await prisma.candidate.findUnique({ 
+      where: { id },
+      include: { 
+        broker: true,
+        generatedCVs: { orderBy: { createdAt: 'desc' }, take: 1 }
+      }
+    });
     if (!c) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
     const candidate = {
@@ -88,6 +94,8 @@ export async function GET(
       status: c.status,
       isRequested: c.isRequested,
       registeredAt: c.registeredAt.toISOString(),
+      broker: c.broker,
+      latestCVTemplate: c.generatedCVs?.[0]?.templateId || null,
     };
     return NextResponse.json(candidate);
   } catch (error) {

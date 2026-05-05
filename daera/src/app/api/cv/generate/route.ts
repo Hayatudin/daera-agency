@@ -16,7 +16,7 @@ const TEMPLATE_MAP: Record<string, string> = {
 
 export async function POST(request: Request) {
   try {
-    const { candidateId, templateId, format, deadline, facePhoto, fullBodyPhoto } = await request.json();
+    const { candidateId, templateId, format, facePhoto, fullBodyPhoto } = await request.json();
 
     if (!candidateId || !templateId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -257,7 +257,7 @@ export async function POST(request: Request) {
       'passport image': passportPhotoData,
 
       // Meta
-      deadline: deadline ? new Date(deadline).toLocaleDateString() : '',
+      deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString(),
       generatedAt: new Date().toLocaleDateString(),
 
       // Uppercase & Custom Aliases

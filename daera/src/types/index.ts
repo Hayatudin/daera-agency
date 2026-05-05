@@ -68,6 +68,7 @@ export interface Candidate {
   cvDeadline?: string;
   brokerId?: string;
   broker?: Broker;
+  latestCVTemplate?: string | null;
 }
 
 export interface Broker {

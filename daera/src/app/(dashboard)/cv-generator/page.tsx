@@ -38,8 +38,6 @@ function CVGeneratorContent() {
   const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(urlCandidateId);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('alm');
   const [fullBodyPhoto, setFullBodyPhoto] = useState<string | null>(null);
-  const [deadline, setDeadline] = useState<string>('');
-  const [isSavingDeadline, setIsSavingDeadline] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [isDownloadOpen, setIsDownloadOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -58,15 +56,6 @@ function CVGeneratorContent() {
 
   const selectedCandidate = candidates.find(c => c.id === selectedCandidateId) || null;
 
-  React.useEffect(() => {
-    if (selectedCandidate) {
-      setDeadline(selectedCandidate.cvDeadline || '');
-    } else {
-      setDeadline('');
-    }
-  }, [selectedCandidate]);
-
-  // Auto-pull face photo from the selected candidate's passport image
   const facePhoto = selectedCandidate?.facePhotoUrl || selectedCandidate?.passportImageUrl || null;
 
   const handleBodyUpload = useCallback((file: File) => {
@@ -74,50 +63,6 @@ function CVGeneratorContent() {
     reader.onload = (e) => setFullBodyPhoto(e.target?.result as string);
     reader.readAsDataURL(file);
   }, []);
-
-  // Only update local state on change — don't save yet (calendar navigation fires onChange too)
-  const handleDeadlineChange = (newDeadline: string) => {
-    setDeadline(newDeadline);
-  };
-
-  // Save to DB only when user finishes picking (on blur) or when a valid date is confirmed
-  const saveDeadline = async (dateValue: string) => {
-    if (!selectedCandidateId) return;
-    
-    // Only save if we have a complete, valid YYYY-MM-DD date string
-    if (!dateValue || !/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) return;
-    
-    // Don't re-save if the value hasn't changed from what's already in the DB
-    const currentCandidate = candidates.find(c => c.id === selectedCandidateId);
-    if (currentCandidate?.cvDeadline === dateValue) return;
-    
-    setIsSavingDeadline(true);
-    try {
-      const res = await fetch(`/api/candidates/${selectedCandidateId}/deadline`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ deadline: dateValue }),
-      });
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.details || errData.error || 'Failed to save deadline');
-      }
-      
-      // Update local candidates state so it persists if we switch back and forth
-      setCandidates(prev => prev.map(c => 
-        c.id === selectedCandidateId ? { ...c, cvDeadline: dateValue } : c
-      ));
-      
-      setToast('Deadline saved successfully');
-      setTimeout(() => setToast(null), 2000);
-    } catch (err) {
-      console.error('Error saving deadline:', err);
-      setToast(err instanceof Error ? err.message : 'Failed to save deadline');
-      setTimeout(() => setToast(null), 5000);
-    } finally {
-      setIsSavingDeadline(false);
-    }
-  };
 
   const handleDownload = async (format: 'pdf' | 'jpg' | 'doc') => {
     if (!cvRef.current || !selectedCandidate) return;
@@ -199,7 +144,6 @@ function CVGeneratorContent() {
           candidateId: selectedCandidateId,
           templateId: `tmpl-${selectedTemplateId}`,
           format: 'doc',
-          deadline,
           facePhoto,
           fullBodyPhoto
         };
@@ -376,35 +320,7 @@ function CVGeneratorContent() {
             />
           </div>
 
-          {/* Application Details Card */}
-          <div className="bg-surface rounded-[1.5rem] border border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Calendar size={16} className="text-primary" />
-              <h2 className="font-semibold text-text-primary">Application Settings</h2>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-text-secondary block mb-2">CV Deadline</label>
-              <input
-                type="date"
-                className="w-full px-4 py-2.5 rounded-xl border border-border bg-surface text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-                value={deadline}
-                onChange={(e) => handleDeadlineChange(e.target.value)}
-                onBlur={(e) => saveDeadline(e.target.value)}
-                disabled={isSavingDeadline}
-              />
-              {isSavingDeadline && (
-                <p className="text-xs text-text-tertiary mt-1 animate-pulse">Saving deadline...</p>
-              )}
-              {deadline && /^\d{4}-\d{2}-\d{2}$/.test(deadline) && !isSavingDeadline && (
-                <div className="mt-3 flex items-center gap-2 p-3 bg-amber-50 rounded-xl border border-amber-100">
-                  <Bell size={14} className="text-amber-600 shrink-0" />
-                  <p className="text-xs text-amber-700">
-                    System will notify via Telegram regarding this CV application on <strong>{new Date(deadline + 'T00:00:00').toLocaleDateString()}</strong>.
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
+
 
           {/* Template Selection Card */}
           <div className="bg-surface rounded-[1.5rem] border border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6">
