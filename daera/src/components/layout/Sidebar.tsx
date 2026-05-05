@@ -20,13 +20,14 @@ import {
 const navItems = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, disabled: false },
   { label: 'Candidates', href: '/candidates', icon: Users, disabled: false },
-  { label: 'Requested', href: '/requested', icon: ClipboardList, disabled: false },
-  { label: 'Not Requested', href: '/not-requested', icon: ClipboardList, disabled: false },
+  { label: 'Visa Selected', href: '/requested', icon: ClipboardList, disabled: false },
+  { label: 'Not Visa Selected', href: '/not-requested', icon: ClipboardList, disabled: false },
   { label: 'Fit Candidates', href: '/fit-candidates', icon: UserCheck, disabled: false },
   { label: 'Brokers', href: '/brokers', icon: Users, disabled: false },
   { label: 'Registration', href: '/registration', icon: UserPlus, disabled: false },
   { label: 'CV Generator', href: '/cv-generator', icon: FileText, disabled: false },
   { label: 'Generated CVs', href: '/generated-cvs', icon: FolderOpen, disabled: false },
+  { label: 'Backup CVs', href: '/backup', icon: FolderOpen, disabled: false },
   { label: 'Settings', href: '/settings', icon: Settings, disabled: false },
 ];
 

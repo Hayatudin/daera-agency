@@ -24,6 +24,8 @@ export default function CandidatesPage() {
   const [missingFileFilter, setMissingFileFilter] = useState('');
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [viewDoc, setViewDoc] = useState<string | null>(null);
+  const [visaModalId, setVisaModalId] = useState<string | null>(null);
+  const [visaNumberInput, setVisaNumberInput] = useState('');
 
   // Close menu on outside click
   useEffect(() => {
@@ -35,17 +37,26 @@ export default function CandidatesPage() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  // Toggle requested
-  const toggleRequested = async (id: string, current: boolean) => {
+  // Toggle Visa Selected
+  const toggleRequested = async (id: string, current: boolean, visaNum?: string) => {
     setOpenMenuId(null);
+    setVisaModalId(null);
+    setVisaNumberInput('');
     try {
+      const bodyPayload: any = { isRequested: !current };
+      if (!current && visaNum) {
+        bodyPayload.visaOrContractNumber = visaNum;
+      } else if (current) {
+        bodyPayload.visaOrContractNumber = null; // Clear if cancelled
+      }
+
       const res = await fetch(`/api/candidates/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isRequested: !current }),
+        body: JSON.stringify(bodyPayload),
       });
       if (!res.ok) throw new Error();
-      setCandidates(prev => prev.map(c => c.id === id ? { ...c, isRequested: !current } : c));
+      setCandidates(prev => prev.map(c => c.id === id ? { ...c, isRequested: !current, visaOrContractNumber: bodyPayload.visaOrContractNumber } : c));
     } catch { alert('Failed to update status'); }
   };
 
@@ -205,7 +216,7 @@ export default function CandidatesPage() {
                 <th className="px-6 py-4 font-semibold">Candidate</th>
                 <th className="px-6 py-4 font-semibold">Passport No.</th>
                 <th className="px-6 py-4 font-semibold">Job / Skills</th>
-                <th className="px-6 py-4 font-semibold">Requested</th>
+                <th className="px-6 py-4 font-semibold">Visa Status</th>
                 <th className="px-6 py-4 font-semibold">COC</th>
                 <th className="px-6 py-4 font-semibold">Medical</th>
                 <th className="px-6 py-4 font-semibold text-right">Actions</th>
@@ -255,11 +266,14 @@ export default function CandidatesPage() {
                       <p className="text-xs text-text-tertiary truncate max-w-[200px]">{candidate.personalInfo.skills.slice(0, 3).join(', ')}{candidate.personalInfo.skills.length > 3 ? '...' : ''}</p>
                     </td>
 
-                    {/* Requested */}
+                    {/* Visa Selected */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Badge variant={candidate.isRequested ? 'success' : 'default'}>
-                        {candidate.isRequested ? '✓ Requested' : 'Not Requested'}
+                        {candidate.isRequested ? '✓ Visa Selected' : 'Pending Visa'}
                       </Badge>
+                      {candidate.isRequested && candidate.visaOrContractNumber && (
+                        <p className="text-[10px] text-text-tertiary mt-1 max-w-[120px] truncate" title={candidate.visaOrContractNumber}>No: {candidate.visaOrContractNumber}</p>
+                      )}
                     </td>
 
                     {/* COC */}
@@ -276,12 +290,13 @@ export default function CandidatesPage() {
                       <div className="flex items-center gap-2">
                         <select
                           value={candidate.personalInfo.medicalStatus || 'Pending'}
+                          onClick={(e) => e.stopPropagation()}
                           onChange={(e) => updateMedicalStatus(candidate.id, e.target.value)}
                           className={cn(
-                            "text-xs font-bold px-2 py-1 rounded border appearance-none outline-none cursor-pointer",
-                            candidate.personalInfo.medicalStatus === 'Fit' ? "bg-emerald-50 text-emerald-700 border-emerald-200" :
-                            candidate.personalInfo.medicalStatus === 'Unfit' ? "bg-red-50 text-red-700 border-red-200" :
-                            "bg-gray-50 text-gray-600 border-gray-200"
+                            "text-xs font-bold px-3 py-1.5 rounded-lg border appearance-none outline-none cursor-pointer shadow-sm transition-all",
+                            candidate.personalInfo.medicalStatus === 'Fit' ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 focus:ring-2 focus:ring-emerald-500/20" :
+                            candidate.personalInfo.medicalStatus === 'Unfit' ? "bg-red-50 text-red-700 border-red-200 hover:bg-red-100 focus:ring-2 focus:ring-red-500/20" :
+                            "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 focus:ring-2 focus:ring-amber-500/20"
                           )}
                         >
                           <option value="Pending">Pending</option>
@@ -289,7 +304,7 @@ export default function CandidatesPage() {
                           <option value="Unfit">Unfit</option>
                         </select>
                         {candidate.medicalDocumentUrl && (
-                          <button onClick={() => setViewDoc(candidate.medicalDocumentUrl!)} className="text-sm text-primary hover:text-primary-600 transition-colors" title="View Medical Doc">
+                          <button onClick={(e) => { e.stopPropagation(); setViewDoc(candidate.medicalDocumentUrl!); }} className="text-sm text-primary hover:bg-primary-50 p-1.5 rounded-lg transition-colors" title="View Medical Doc">
                             <Eye size={16} />
                           </button>
                         )}
@@ -304,10 +319,17 @@ export default function CandidatesPage() {
                         </button>
                         {openMenuId === candidate.id && (
                           <div className="absolute right-0 top-full mt-1 w-48 bg-surface border border-border rounded-xl shadow-xl z-50 py-1 animate-fade-in">
-                            <button onClick={() => toggleRequested(candidate.id, !!candidate.isRequested)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
-                              <CheckCircle size={16} className={candidate.isRequested ? 'text-green-500' : 'text-text-tertiary'} />
-                              <span>{candidate.isRequested ? 'Remove Requested' : 'Mark as Requested'}</span>
-                            </button>
+                            {candidate.isRequested ? (
+                              <button onClick={(e) => { e.stopPropagation(); toggleRequested(candidate.id, true); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
+                                <CheckCircle size={16} className="text-amber-500" />
+                                <span>Cancel Visa Selected</span>
+                              </button>
+                            ) : (
+                              <button onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); setVisaModalId(candidate.id); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
+                                <CheckCircle size={16} className="text-text-tertiary" />
+                                <span>Visa Selected</span>
+                              </button>
+                            )}
                             <button onClick={() => { setOpenMenuId(null); router.push(`/registration?edit=${candidate.id}`); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
                               <Edit3 size={16} className="text-text-tertiary" />
                               <span>Edit</span>
@@ -358,6 +380,42 @@ export default function CandidatesPage() {
                   <a href={viewDoc} target="_blank" rel="noreferrer" className="text-primary hover:underline">Open in new tab</a>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Visa Selected Modal */}
+      {visaModalId && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in" onClick={() => setVisaModalId(null)}>
+          <div className="bg-white rounded-[1.5rem] shadow-2xl max-w-md w-full overflow-hidden scale-in" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 border-b border-border bg-gray-50">
+              <h3 className="font-bold text-text-primary text-lg flex items-center gap-2">
+                <CheckCircle className="text-green-600" size={20} /> Insert Visa / Contract Details
+              </h3>
+              <button onClick={() => setVisaModalId(null)} className="text-text-tertiary hover:text-text-primary p-1 rounded-lg hover:bg-gray-200 transition-colors">✕</button>
+            </div>
+            <div className="p-6">
+              <label className="block text-sm font-semibold text-text-primary mb-2">Insert contract number or visa number</label>
+              <Input 
+                autoFocus
+                placeholder="e.g. VIS-123456 or CON-7890" 
+                value={visaNumberInput} 
+                onChange={(e) => setVisaNumberInput(e.target.value)} 
+                className="w-full"
+              />
+            </div>
+            <div className="p-5 border-t border-border flex justify-end gap-3 bg-gray-50">
+              <button onClick={() => setVisaModalId(null)} className="px-4 py-2 text-sm font-semibold text-text-secondary hover:text-text-primary transition-colors">
+                Cancel
+              </button>
+              <button 
+                disabled={!visaNumberInput.trim()}
+                onClick={() => toggleRequested(visaModalId, false, visaNumberInput.trim())}
+                className="px-6 py-2 text-sm font-bold text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all shadow-md hover:shadow-lg"
+              >
+                Confirm
+              </button>
             </div>
           </div>
         </div>

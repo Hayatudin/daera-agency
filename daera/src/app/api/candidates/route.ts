@@ -90,6 +90,7 @@ export async function GET() {
       relativeIdImageUrl: c.relativeIdImageUrl || '',
       labourIdUrl: c.labourIdUrl || '',
       isRequested: c.isRequested || false,
+      visaOrContractNumber: c.visaOrContractNumber || null,
       registeredAt: c.registeredAt.toISOString(),
       status: c.status,
       generatedCVs: c.generatedCVs?.map(cv => cv.templateId) || [],

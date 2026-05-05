@@ -66,6 +66,7 @@ model Candidate {
   relativeIdImageUrl       String?
   labourIdUrl              String?
   isRequested              Boolean   @default(false)
+  visaOrContractNumber     String?
   registeredAt             DateTime  @default(now())
   status                   String    @default("pending")
 

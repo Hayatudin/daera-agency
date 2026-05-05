@@ -96,6 +96,7 @@ export async function GET(
       labourIdUrl: c.labourIdUrl || '',
       status: c.status,
       isRequested: c.isRequested,
+      visaOrContractNumber: c.visaOrContractNumber || null,
       registeredAt: c.registeredAt.toISOString(),
       broker: c.broker,
       latestCVTemplate: c.generatedCVs?.[0]?.templateId || null,

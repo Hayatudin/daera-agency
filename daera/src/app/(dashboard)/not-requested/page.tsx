@@ -15,6 +15,8 @@ export default function NotRequestedPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [viewDoc, setViewDoc] = useState<string | null>(null);
+  const [visaModalId, setVisaModalId] = useState<string | null>(null);
+  const [visaNumberInput, setVisaNumberInput] = useState('');
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -27,17 +29,18 @@ export default function NotRequestedPage() {
 
   const candidates = allCandidates.filter(c => !c.isRequested);
 
-  const markAsRequested = async (id: string) => {
+  const markAsVisaSelected = async (id: string, visaNum: string) => {
     setOpenMenuId(null);
+    setVisaModalId(null);
+    setVisaNumberInput('');
     try {
       const res = await fetch(`/api/candidates/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isRequested: true }),
+        body: JSON.stringify({ isRequested: true, visaOrContractNumber: visaNum }),
       });
       if (!res.ok) throw new Error();
-      // Update local state by removing the newly requested candidate
-      mutate(prev => prev.map(c => c.id === id ? { ...c, isRequested: true } : c));
+      mutate(prev => prev.map(c => c.id === id ? { ...c, isRequested: true, visaOrContractNumber: visaNum } : c));
     } catch { alert('Failed to update status'); }
   };
 
@@ -79,7 +82,7 @@ export default function NotRequestedPage() {
                 <th className="px-6 py-4 font-semibold">Candidate</th>
                 <th className="px-6 py-4 font-semibold">Passport No.</th>
                 <th className="px-6 py-4 font-semibold">Job / Skills</th>
-                <th className="px-6 py-4 font-semibold">Status</th>
+                <th className="px-6 py-4 font-semibold">Visa Status</th>
                 <th className="px-6 py-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
@@ -111,7 +114,7 @@ export default function NotRequestedPage() {
                       <p className="text-xs text-text-tertiary truncate max-w-[180px]">{c.personalInfo.skills.slice(0, 3).join(', ')}</p>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Badge variant="warning">Not Requested</Badge>
+                      <Badge variant="default">Pending Visa</Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="relative inline-block" data-action-menu>
@@ -120,9 +123,9 @@ export default function NotRequestedPage() {
                         </button>
                         {openMenuId === c.id && (
                           <div className="absolute right-0 top-full mt-1 w-52 bg-surface border border-border rounded-xl shadow-xl z-50 py-1 animate-fade-in">
-                            <button onClick={() => markAsRequested(c.id)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
+                            <button onClick={() => setVisaModalId(c.id)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
                               <UserCheck size={16} className="text-green-500" />
-                              <span>Mark as Requested</span>
+                              <span>Visa Selected</span>
                             </button>
                             <div className="border-t border-border my-1" />
                             <button onClick={() => deleteCandidate(c.id)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-red-50 transition-colors text-left text-red-600">

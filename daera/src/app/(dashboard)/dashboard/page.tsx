@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import Button from '@/components/ui/Button';
 import { Users, UserPlus, ExternalLink, Loader2, MoreVertical, CheckCircle, Trash2, Edit3, Eye, ClipboardList } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
+import Input from '@/components/ui/Input';
 import { Candidate } from '@/types';
 
 import { useCandidates } from '@/hooks/useCandidates';
@@ -18,6 +19,8 @@ export default function DashboardPage() {
   const { candidates: allCandidates, isLoading, mutate: setAllCandidates } = useCandidates();
   const [openMenuId, setOpenMenuId] = React.useState<string | null>(null);
   const [viewDoc, setViewDoc] = React.useState<string | null>(null);
+  const [visaModalId, setVisaModalId] = React.useState<string | null>(null);
+  const [visaNumberInput, setVisaNumberInput] = React.useState('');
 
   React.useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -28,16 +31,25 @@ export default function DashboardPage() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const toggleRequested = async (id: string, current: boolean) => {
+  const toggleRequested = async (id: string, current: boolean, visaNum?: string) => {
     setOpenMenuId(null);
+    setVisaModalId(null);
+    setVisaNumberInput('');
     try {
+      const bodyPayload: any = { isRequested: !current };
+      if (!current && visaNum) {
+        bodyPayload.visaOrContractNumber = visaNum;
+      } else if (current) {
+        bodyPayload.visaOrContractNumber = null;
+      }
+
       const res = await fetch(`/api/candidates/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isRequested: !current }),
+        body: JSON.stringify(bodyPayload),
       });
       if (!res.ok) throw new Error();
-      setAllCandidates(prev => prev.map(c => c.id === id ? { ...c, isRequested: !current } : c));
+      setAllCandidates(prev => prev.map(c => c.id === id ? { ...c, isRequested: !current, visaOrContractNumber: bodyPayload.visaOrContractNumber } : c));
     } catch { alert('Failed to update status'); }
   };
 
@@ -86,14 +98,14 @@ export default function DashboardPage() {
           <div className="p-4 rounded-2xl bg-success/10"><ClipboardList size={24} className="text-success" /></div>
           <div>
             <p className="text-2xl font-bold text-text-primary">{requestedCount}</p>
-            <p className="text-sm text-text-tertiary">Requested</p>
+            <p className="text-sm text-text-tertiary">Visa Selected</p>
           </div>
         </div>
         <div className="bg-surface rounded-[1.5rem] border border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all p-6 flex items-center gap-5">
           <div className="p-4 rounded-2xl bg-warning/10"><UserPlus size={24} className="text-warning" /></div>
           <div>
             <p className="text-2xl font-bold text-text-primary">{allCandidates.length - requestedCount}</p>
-            <p className="text-sm text-text-tertiary">Not Requested</p>
+            <p className="text-sm text-text-tertiary">Not Visa Selected</p>
           </div>
         </div>
       </div>
@@ -114,7 +126,7 @@ export default function DashboardPage() {
                   <th className="px-6 py-4 font-semibold">Candidate</th>
                   <th className="px-6 py-4 font-semibold">Passport No.</th>
                   <th className="px-6 py-4 font-semibold">Job / Skills</th>
-                  <th className="px-6 py-4 font-semibold">Requested</th>
+                  <th className="px-6 py-4 font-semibold">Visa Status</th>
                   <th className="px-6 py-4 font-semibold">COC</th>
                   <th className="px-6 py-4 font-semibold">Medical</th>
                   <th className="px-6 py-4 font-semibold text-right">Actions</th>
@@ -149,7 +161,7 @@ export default function DashboardPage() {
                         <p className="text-xs text-text-tertiary truncate max-w-[200px]">{candidate.personalInfo.skills.slice(0, 3).join(', ')}{candidate.personalInfo.skills.length > 3 ? '...' : ''}</p>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <Badge variant={candidate.isRequested ? 'success' : 'default'}>{candidate.isRequested ? '✓ Requested' : 'Not Requested'}</Badge>
+                        <Badge variant={candidate.isRequested ? 'success' : 'default'}>{candidate.isRequested ? '✓ Visa Selected' : 'Pending Visa'}</Badge>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {candidate.cocDocumentUrl ? (
@@ -167,11 +179,17 @@ export default function DashboardPage() {
                             <MoreVertical size={18} />
                           </button>
                           {openMenuId === candidate.id && (
-                            <div className="absolute right-0 top-full mt-1 w-48 bg-surface border border-border rounded-xl shadow-xl z-50 py-1 animate-fade-in">
-                              <button onClick={() => toggleRequested(candidate.id, !!candidate.isRequested)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
-                                <CheckCircle size={16} className={candidate.isRequested ? 'text-green-500' : 'text-text-tertiary'} />
-                                <span>{candidate.isRequested ? 'Remove Requested' : 'Mark as Requested'}</span>
+                            {candidate.isRequested ? (
+                              <button onClick={(e) => { e.stopPropagation(); toggleRequested(candidate.id, true); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
+                                <CheckCircle size={16} className="text-amber-500" />
+                                <span>Cancel Visa Selected</span>
                               </button>
+                            ) : (
+                              <button onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); setVisaModalId(candidate.id); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
+                                <CheckCircle size={16} className="text-text-tertiary" />
+                                <span>Visa Selected</span>
+                              </button>
+                            )}
                               <div className="border-t border-border my-1" />
                               <button onClick={() => deleteCandidate(candidate.id)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-red-50 transition-colors text-left text-red-600">
                                 <Trash2 size={16} /><span>Delete</span>
@@ -194,7 +212,7 @@ export default function DashboardPage() {
       {/* Recent Requested Table */}
       <section>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-text-primary flex items-center gap-2"><ClipboardList className="text-green-600" size={20} /> Recent Requested</h2>
+          <h2 className="text-xl font-bold text-text-primary flex items-center gap-2"><ClipboardList className="text-green-600" size={20} /> Recent Visa Selected</h2>
           <Link href="/requested" className="text-sm text-primary hover:underline font-medium">View All →</Link>
         </div>
 
@@ -242,7 +260,7 @@ export default function DashboardPage() {
                         <p className="text-xs text-text-tertiary truncate max-w-[200px]">{candidate.personalInfo.skills.slice(0, 3).join(', ')}{candidate.personalInfo.skills.length > 3 ? '...' : ''}</p>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <Badge variant="success">✓ Requested</Badge>
+                        <Badge variant="success">✓ Visa Selected</Badge>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {candidate.cocDocumentUrl ? (
@@ -261,9 +279,9 @@ export default function DashboardPage() {
                           </button>
                           {openMenuId === candidate.id && (
                             <div className="absolute right-0 top-full mt-1 w-48 bg-surface border border-border rounded-xl shadow-xl z-50 py-1 animate-fade-in">
-                              <button onClick={() => toggleRequested(candidate.id, !!candidate.isRequested)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
+                              <button onClick={(e) => { e.stopPropagation(); toggleRequested(candidate.id, true); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
                                 <CheckCircle size={16} className="text-amber-500" />
-                                <span>Remove Requested</span>
+                                <span>Cancel Visa Selected</span>
                               </button>
                               <div className="border-t border-border my-1" />
                               <button onClick={() => deleteCandidate(candidate.id)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-red-50 transition-colors text-left text-red-600">
@@ -276,7 +294,7 @@ export default function DashboardPage() {
                     </tr>
                   ))
                 ) : (
-                  <tr><td colSpan={8} className="px-6 py-10 text-center text-text-tertiary">No requested candidates yet.</td></tr>
+                  <tr><td colSpan={8} className="px-6 py-10 text-center text-text-tertiary">No visa selected candidates yet.</td></tr>
                 )}
               </tbody>
             </table>
@@ -311,6 +329,42 @@ export default function DashboardPage() {
                   <a href={viewDoc} target="_blank" rel="noreferrer" className="text-primary hover:underline">Open in new tab</a>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Visa Selected Modal */}
+      {visaModalId && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in" onClick={() => setVisaModalId(null)}>
+          <div className="bg-white rounded-[1.5rem] shadow-2xl max-w-md w-full overflow-hidden scale-in" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 border-b border-border bg-gray-50">
+              <h3 className="font-bold text-text-primary text-lg flex items-center gap-2">
+                <CheckCircle className="text-green-600" size={20} /> Insert Visa / Contract Details
+              </h3>
+              <button onClick={() => setVisaModalId(null)} className="text-text-tertiary hover:text-text-primary p-1 rounded-lg hover:bg-gray-200 transition-colors">✕</button>
+            </div>
+            <div className="p-6">
+              <label className="block text-sm font-semibold text-text-primary mb-2">Insert contract number or visa number</label>
+              <Input 
+                autoFocus
+                placeholder="e.g. VIS-123456 or CON-7890" 
+                value={visaNumberInput} 
+                onChange={(e) => setVisaNumberInput(e.target.value)} 
+                className="w-full"
+              />
+            </div>
+            <div className="p-5 border-t border-border flex justify-end gap-3 bg-gray-50">
+              <button onClick={() => setVisaModalId(null)} className="px-4 py-2 text-sm font-semibold text-text-secondary hover:text-text-primary transition-colors">
+                Cancel
+              </button>
+              <button 
+                disabled={!visaNumberInput.trim()}
+                onClick={() => toggleRequested(visaModalId, false, visaNumberInput.trim())}
+                className="px-6 py-2 text-sm font-bold text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all shadow-md hover:shadow-lg"
+              >
+                Confirm
+              </button>
             </div>
           </div>
         </div>

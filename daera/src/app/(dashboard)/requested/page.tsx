@@ -27,16 +27,16 @@ export default function RequestedPage() {
 
   const candidates = allCandidates.filter(c => c.isRequested);
 
-  const removeRequested = async (id: string) => {
+  const cancelVisa = async (id: string) => {
     setOpenMenuId(null);
     try {
       const res = await fetch(`/api/candidates/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isRequested: false }),
+        body: JSON.stringify({ isRequested: false, visaOrContractNumber: null }),
       });
       if (!res.ok) throw new Error();
-      mutate(prev => prev.map(c => c.id === id ? { ...c, isRequested: false } : c));
+      mutate(prev => prev.map(c => c.id === id ? { ...c, isRequested: false, visaOrContractNumber: null } : c));
     } catch { alert('Failed to update status'); }
   };
 
@@ -112,7 +112,10 @@ export default function RequestedPage() {
                       <p className="text-xs text-text-tertiary truncate max-w-[180px]">{c.personalInfo.skills.slice(0, 3).join(', ')}</p>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Badge variant="success">✓ Requested</Badge>
+                      <Badge variant="success">✓ Visa Selected</Badge>
+                      {c.visaOrContractNumber && (
+                        <p className="text-[10px] text-text-tertiary mt-1 max-w-[120px] truncate" title={c.visaOrContractNumber}>No: {c.visaOrContractNumber}</p>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {c.cocDocumentUrl ? (
@@ -131,9 +134,9 @@ export default function RequestedPage() {
                         </button>
                         {openMenuId === c.id && (
                           <div className="absolute right-0 top-full mt-1 w-52 bg-surface border border-border rounded-xl shadow-xl z-50 py-1 animate-fade-in">
-                            <button onClick={() => removeRequested(c.id)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
+                            <button onClick={() => cancelVisa(c.id)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
                               <CheckCircle size={16} className="text-amber-500" />
-                              <span>Remove Requested</span>
+                              <span>Cancelled</span>
                             </button>
                             <div className="border-t border-border my-1" />
                             <button onClick={() => deleteCandidate(c.id)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-red-50 transition-colors text-left text-red-600">
@@ -146,7 +149,7 @@ export default function RequestedPage() {
                   </tr>
                 ))
               ) : (
-                <tr><td colSpan={8} className="px-6 py-10 text-center text-text-tertiary">No requested candidates. Mark candidates as &quot;Requested&quot; from the Candidates page.</td></tr>
+                <tr><td colSpan={8} className="px-6 py-10 text-center text-text-tertiary">No Visa Selected candidates. Mark candidates as &quot;Visa Selected&quot; from the Candidates page.</td></tr>
               )}
             </tbody>
           </table>

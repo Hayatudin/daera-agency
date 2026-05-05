@@ -69,6 +69,7 @@ export interface Candidate {
   relativeIdImageUrl?: string;
   labourIdUrl?: string;
   isRequested?: boolean;
+  visaOrContractNumber?: string | null;
   registeredAt: string;
   status: 'pending' | 'approved' | 'rejected';
   cvDeadline?: string;

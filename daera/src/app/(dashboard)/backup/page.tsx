@@ -31,14 +31,13 @@ const TEMPLATES = [
 
 // ── Action Dropdown — portal with fixed positioning so it escapes overflow:hidden ──
 function ActionMenu({
+  cvId,
   currentTemplateId,
-  onDelete,
-  onChangeTemplate,
+  onRestore,
 }: {
   cvId: string;
   currentTemplateId: string;
-  onDelete: () => void;
-  onChangeTemplate: () => void;
+  onRestore: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
@@ -302,7 +301,7 @@ function DeleteModal({
 }
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
-export default function GeneratedCVsPage() {
+export default function BackupPage() {
   const router = useRouter();
   const [cvs, setCvs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -312,8 +311,7 @@ export default function GeneratedCVsPage() {
   const [isDownloadingAll, setIsDownloadingAll] = useState(false);
 
   // Modals
-  const [changeTarget, setChangeTarget] = useState<any | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [restoreTarget, setRestoreTarget] = useState<any | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
@@ -334,7 +332,7 @@ export default function GeneratedCVsPage() {
       const res = await fetch('/api/generated-cvs', { cache: 'no-store' });
       if (!res.ok) throw new Error('Failed');
       const data = await res.json();
-      setCvs(data.filter((c: any) => !c.candidate.isRequested));
+      setCvs(data.filter((c: any) => c.candidate.isRequested));
     } catch {
       showToast('Failed to load CVs', 'error');
     } finally {
@@ -344,89 +342,28 @@ export default function GeneratedCVsPage() {
 
   useEffect(() => { fetchCVs(); }, []);
 
-  // ── Delete ─────────────────────────────────────────────────────────────────
-  const handleConfirmDelete = async () => {
-    if (!deleteTarget) return;
+  // ── Restore ─────────────────────────────────────────────────────────────────
+  const handleRestore = async (cv: any) => {
     setActionLoading(true);
     try {
-      const res = await fetch(`/api/generated-cvs/${deleteTarget.id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed');
-      setCvs(prev => prev.filter(c => c.id !== deleteTarget.id));
-      showToast('CV record deleted successfully');
-    } catch {
-      showToast('Failed to delete CV record', 'error');
-    } finally {
-      setActionLoading(false);
-      setDeleteTarget(null);
-    }
-  };
-
-  // ── Change Template ────────────────────────────────────────────────────────
-  const handleConfirmChange = async (newTemplateId: string) => {
-    if (!changeTarget) return;
-    setActionLoading(true);
-    try {
-      const res = await fetch(`/api/generated-cvs/${changeTarget.id}`, {
+      const res = await fetch(`/api/candidates/${cv.candidateId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ templateId: newTemplateId }),
+        body: JSON.stringify({ isRequested: false, visaOrContractNumber: null }),
       });
+      if (!res.ok) throw new Error('Failed to restore');
       
-      if (res.status === 409) {
-        showToast('Candidate already generated in that template', 'error');
-        setChangeTarget(null);
-        return;
-      }
-      
-      if (!res.ok) throw new Error('Failed');
-      const newTemplateName = TEMPLATES.find(t => t.id === newTemplateId)?.name;
-      setCvs(prev => prev.map(c => c.id === changeTarget.id ? { ...c, templateId: newTemplateId } : c));
-      showToast(`Moved to "${newTemplateName}" folder`);
-      setChangeTarget(null);
-      setSelectedFolder(newTemplateId); // jump to new folder
+      // Remove from the local cvs array because they are no longer in backup
+      setCvs(prev => prev.filter(c => c.candidateId !== cv.candidateId));
+      showToast('Candidate restored to active CV folders');
     } catch {
-      showToast('Failed to change template', 'error');
+      showToast('Failed to restore candidate', 'error');
     } finally {
       setActionLoading(false);
     }
   };
 
-  const handleDownloadAndChange = async (newTemplateId: string, format: 'pdf' | 'jpg' | 'doc') => {
-    if (!changeTarget) return;
-    setActionLoading(true);
-    try {
-      const res = await fetch(`/api/generated-cvs/${changeTarget.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ templateId: newTemplateId }),
-      });
-      
-      if (res.status === 409) {
-        showToast('Candidate already generated in that template', 'error');
-        setChangeTarget(null);
-        return;
-      }
-      
-      if (!res.ok) throw new Error('Failed to update database');
-      
-      const newTemplateName = TEMPLATES.find(t => t.id === newTemplateId)?.name;
-      const updatedCv = { ...changeTarget, templateId: newTemplateId };
-      
-      setCvs(prev => prev.map(c => c.id === changeTarget.id ? updatedCv : c));
-      showToast(`Moved to "${newTemplateName}" folder`);
-      
-      // Start download of the NEW CV
-      startDownload(updatedCv, format as any);
-      
-      setChangeTarget(null);
-      setSelectedFolder(newTemplateId); // jump to new folder
-    } catch (error) {
-      console.error('Change template error:', error);
-      showToast('Failed to change template', 'error');
-    } finally {
-      setActionLoading(false);
-    }
-  };
+
 
   // ── Inline Download ────────────────────────────────────────────────────────
   // Trigger download after downloadingCv state is set & hidden div is rendered
@@ -522,13 +459,10 @@ export default function GeneratedCVsPage() {
             <div>
               <h1 className="text-2xl font-bold text-text-primary flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-primary-50"><FolderOpen size={22} className="text-primary" /></div>
-                Generated CVs
+                Backup CVs
               </h1>
-              <p className="text-text-secondary mt-1 ml-12">All generated CVs organized by template</p>
+              <p className="text-text-secondary mt-1 ml-12">CV templates for candidates with Visa Selected status</p>
             </div>
-            <Link href="/cv-generator">
-              <Button className="flex items-center gap-2"><RefreshCw size={16} />Generate New CV</Button>
-            </Link>
           </div>
 
           {isLoading ? (
@@ -840,8 +774,7 @@ export default function GeneratedCVsPage() {
                     <ActionMenu
                       cvId={cv.id}
                       currentTemplateId={cv.templateId}
-                      onDelete={() => setDeleteTarget(cv)}
-                      onChangeTemplate={() => setChangeTarget(cv)}
+                      onRestore={() => handleRestore(cv)}
                     />
                   </div>
 
@@ -902,24 +835,7 @@ export default function GeneratedCVsPage() {
         })()}
       </div>
 
-      {/* Modals */}
-      {changeTarget && (
-        <ChangeTemplateModal
-          cv={changeTarget}
-          currentTemplateId={changeTarget.templateId}
-          onDownload={handleDownloadAndChange}
-          onClose={() => !actionLoading && setChangeTarget(null)}
-          isLoading={actionLoading}
-        />
-      )}
-      {deleteTarget && (
-        <DeleteModal
-          cv={deleteTarget}
-          onConfirm={handleConfirmDelete}
-          onClose={() => !actionLoading && setDeleteTarget(null)}
-          isLoading={actionLoading}
-        />
-      )}
+
       {toast && <Toast msg={toast.msg} type={toast.type} />}
     </>
   );
