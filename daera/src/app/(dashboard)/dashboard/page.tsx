@@ -179,17 +179,18 @@ export default function DashboardPage() {
                             <MoreVertical size={18} />
                           </button>
                           {openMenuId === candidate.id && (
-                            {candidate.isRequested ? (
-                              <button onClick={(e) => { e.stopPropagation(); toggleRequested(candidate.id, true); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
-                                <CheckCircle size={16} className="text-amber-500" />
-                                <span>Cancel Visa Selected</span>
-                              </button>
-                            ) : (
-                              <button onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); setVisaModalId(candidate.id); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
-                                <CheckCircle size={16} className="text-text-tertiary" />
-                                <span>Visa Selected</span>
-                              </button>
-                            )}
+                            <div className="absolute right-0 top-full mt-1 w-48 bg-surface border border-border rounded-xl shadow-xl z-50 py-1 animate-fade-in">
+                              {candidate.isRequested ? (
+                                <button onClick={(e) => { e.stopPropagation(); toggleRequested(candidate.id, true); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
+                                  <CheckCircle size={16} className="text-amber-500" />
+                                  <span>Cancel Visa Selected</span>
+                                </button>
+                              ) : (
+                                <button onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); setVisaModalId(candidate.id); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
+                                  <CheckCircle size={16} className="text-text-tertiary" />
+                                  <span>Visa Selected</span>
+                                </button>
+                              )}
                               <div className="border-t border-border my-1" />
                               <button onClick={() => deleteCandidate(candidate.id)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-red-50 transition-colors text-left text-red-600">
                                 <Trash2 size={16} /><span>Delete</span>

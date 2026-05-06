@@ -65,16 +65,10 @@ function ActionMenu({
       className="w-48 bg-white border border-border rounded-xl shadow-2xl overflow-hidden"
       onMouseDown={e => e.stopPropagation()}
     >
-      <button onClick={() => { setOpen(false); onChangeTemplate(); }}
+      <button onClick={() => { setOpen(false); onRestore(); }}
         className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-text-primary hover:bg-surface transition-colors"
       >
-        <LayoutTemplate size={14} className="text-primary" /> Change Template
-      </button>
-      <div className="border-t border-border" />
-      <button onClick={() => { setOpen(false); onDelete(); }}
-        className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
-      >
-        <Trash2 size={14} /> Delete CV
+        <RefreshCw size={14} className="text-amber-500" /> Restore from Backup
       </button>
     </div>,
     document.body
