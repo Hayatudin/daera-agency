@@ -29,16 +29,10 @@ export default function NotRequestedPage() {
 
   const candidates = allCandidates.filter(c => !c.isRequested);
 
+  const [isUpdating, setIsUpdating] = useState(false);
+
   const markAsVisaSelected = async (id: string, visaNum: string) => {
-    setOpenMenuId(null);
-    setVisaModalId(null);
-    setVisaNumberInput('');
-
-    // 1. Optimistic Update: Immediately move candidate to requested list locally
-    mutate(prev => prev.map(c => 
-      c.id === id ? { ...c, isRequested: true, visaOrContractNumber: visaNum } : c
-    ));
-
+    setIsUpdating(true);
     try {
       const res = await fetch(`/api/candidates/${id}`, {
         method: 'PATCH',
@@ -46,11 +40,20 @@ export default function NotRequestedPage() {
         body: JSON.stringify({ isRequested: true, visaOrContractNumber: visaNum }),
       });
       
-      // If server definitely failed, we refresh to get the true state
-      if (!res.ok) mutate();
+      if (!res.ok) throw new Error();
+
+      // Successfully updated in DB, now refresh the UI
+      mutate(prev => prev.map(c => 
+        c.id === id ? { ...c, isRequested: true, visaOrContractNumber: visaNum } : c
+      ));
+      
+      setOpenMenuId(null);
+      setVisaModalId(null);
+      setVisaNumberInput('');
     } catch (err) {
-      // In case of network error, refresh data from server to stay in sync
-      mutate();
+      alert('Failed to update status. Please try again.');
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -185,11 +188,18 @@ export default function NotRequestedPage() {
                   Cancel
                 </button>
                 <button
-                  disabled={!visaNumberInput}
+                  disabled={!visaNumberInput || isUpdating}
                   onClick={() => markAsVisaSelected(visaModalId, visaNumberInput)}
-                  className="flex-1 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary-hover transition-colors disabled:opacity-50 shadow-lg shadow-primary/20"
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary-hover transition-colors disabled:opacity-50 shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
                 >
-                  Confirm Selection
+                  {isUpdating ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      Saving…
+                    </>
+                  ) : (
+                    'Confirm Selection'
+                  )}
                 </button>
               </div>
             </div>
