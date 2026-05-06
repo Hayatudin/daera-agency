@@ -1,94 +1,84 @@
+/**
+ * Seed script — creates the initial Super Admin account.
+ * Run with: node prisma/seed.js
+ *
+ * Credentials:
+ *   Email:    hayuuj0@gmail.com
+ *   Password: muju1212
+ *
+ * NOTE: The dev server must be running on port 3000 for this script to work,
+ * because we call the Better Auth sign-up endpoint to properly hash the password.
+ */
+
+require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
-const mockCandidates = [
-  {
-    id: 'CND-001',
-    shelfId: '1045',
-    passportNumber: 'EP4821937',
-    surname: 'MOHAMMED',
-    givenNames: 'AMINA HASSAN',
-    dateOfBirth: new Date('1995-03-15'),
-    gender: 'Female',
-    nationality: 'Ethiopian',
-    issuingCountry: 'Ethiopia',
-    dateOfIssue: new Date('2023-01-10'),
-    dateOfExpiry: new Date('2028-01-09'),
-    placeOfBirth: 'Addis Ababa',
-    maritalStatus: 'Single',
-    numberOfChildren: 0,
-    religion: 'Islam',
-    bloodType: 'O+',
-    height: '162 cm',
-    weight: '55 kg',
-    phone: '+251912345678',
-    email: 'amina.hassan@email.com',
-    address: '123 Bole Road',
-    city: 'Addis Ababa',
-    state: 'Addis Ababa',
-    country: 'Ethiopia',
-    educationLevel: 'High School',
-    languages: ['Amharic', 'English', 'Arabic'],
-    workExperience: '3 years as household helper in Dubai',
-    skills: ['Cooking', 'Cleaning', 'Childcare', 'Laundry'],
-    medicalStatus: 'Fit',
-    biometricStatus: 'Completed',
-    medicalDate: new Date('2026-04-18'),
-    biometricDate: new Date('2026-04-19'),
-    knownConditions: 'None',
-    emergencyContactName: 'Hassan Mohammed',
-    emergencyContactRelation: 'Father',
-    emergencyContactPhone: '+251911234567',
-    registeredAt: new Date('2026-04-20T10:30:00Z'),
-    status: 'approved',
-  }
-];
+const SUPER_ADMIN_EMAIL    = 'hayuuj0@gmail.com';
+const SUPER_ADMIN_PASSWORD = 'muju1212';
+const SUPER_ADMIN_NAME     = 'Super Admin';
+const BASE_URL             = process.env.BETTER_AUTH_URL ?? 'http://localhost:3000';
 
-const mockRequests = [
-  {
-    id: 'req-1',
-    contractNumber: '2005095494',
-    visaNumber: '1907975147',
-    employerName: '1068544269 - MOHAMMED ALOTAIBI',
-    employerId: '1068544269',
-    candidateName: 'KORSO SIMALE FEYISO',
-    job: 'House Maid',
-    nationality: 'Ethiopia',
-    proName: 'Alshablan Recruitment Company',
-    paymentStatus: 'Unpaid',
-    creationDate: new Date('2026-04-21 16:54'),
-    status: 'EPRO APPROVAL',
-    tafweedStatus: 'Verified',
-    tafweedDate: new Date('2026-04-22 10:00'),
+async function signUpViaApi() {
+  const res = await fetch(`${BASE_URL}/api/auth/sign-up/email`, {
+    method:  'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Origin':  BASE_URL,
+      'Referer': BASE_URL,
+    },
+    body:    JSON.stringify({
+      name:     SUPER_ADMIN_NAME,
+      email:    SUPER_ADMIN_EMAIL,
+      password: SUPER_ADMIN_PASSWORD,
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    // 422 means user already exists — that is fine
+    if (res.status === 422 || body?.code === 'USER_ALREADY_EXISTS') {
+      console.log('ℹ️  User already exists — will patch role.');
+      return;
+    }
+    throw new Error(`Sign-up failed (${res.status}): ${JSON.stringify(body)}`);
   }
-];
+
+  console.log('✅ User account created via Better Auth.');
+}
 
 async function main() {
-  console.log('Start seeding...');
-  
-  for (const c of mockCandidates) {
-    await prisma.candidate.upsert({
-      where: { passportNumber: c.passportNumber },
-      update: {},
-      create: c,
-    });
+  console.log('\n🌱 Seeding Super Admin...\n');
+
+  // Step 1: create the account through Better Auth (handles password hashing)
+  await signUpViaApi();
+
+  // Step 2: find the user in the DB
+  const user = await prisma.user.findUnique({ where: { email: SUPER_ADMIN_EMAIL } });
+
+  if (!user) {
+    throw new Error(
+      'User not found in database after sign-up.\n' +
+      'Make sure `npm run dev` is running on port 3000 before running this script.'
+    );
   }
-  
-  for (const r of mockRequests) {
-    await prisma.employmentRequest.upsert({
-      where: { contractNumber: r.contractNumber },
-      update: {},
-      create: r,
-    });
-  }
-  
-  console.log('Seeding finished.');
+
+  // Step 3: promote to super_admin
+  await prisma.user.update({
+    where: { id: user.id },
+    data:  { role: 'super_admin' },
+  });
+
+  console.log('✅ Super Admin seeded successfully!');
+  console.log(`   Name  : ${SUPER_ADMIN_NAME}`);
+  console.log(`   Email : ${SUPER_ADMIN_EMAIL}`);
+  console.log(`   Role  : super_admin\n`);
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
+  .catch(err => {
+    console.error('\n❌ Seed failed:', err.message, '\n');
     process.exit(1);
   })
   .finally(async () => {
