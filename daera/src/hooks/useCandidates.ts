@@ -7,13 +7,15 @@ let fetchPromise: Promise<Candidate[]> | null = null;
 let lastFetchTime = 0;
 const CACHE_TTL = 30000; // 30 seconds
 
-export function useCandidates(forceRefresh = false) {
+export function useCandidates(initialForceRefresh = false) {
   const [candidates, setCandidates] = useState<Candidate[]>(cachedCandidates || []);
   const [isLoading, setIsLoading] = useState(!cachedCandidates);
   const [error, setError] = useState<string | null>(null);
+  const [refreshToggle, setRefreshToggle] = useState(0);
 
   useEffect(() => {
     let mounted = true;
+    const forceRefresh = initialForceRefresh || refreshToggle > 0;
 
     async function loadCandidates() {
       // Use cache if valid and not forcing a refresh
@@ -32,7 +34,7 @@ export function useCandidates(forceRefresh = false) {
           if (!res.ok) throw new Error('Failed to fetch candidates');
           return res.json();
         }).catch(err => {
-          fetchPromise = null; // Clear promise on error so it can be retried
+          fetchPromise = null;
           throw err;
         });
       }
@@ -59,10 +61,16 @@ export function useCandidates(forceRefresh = false) {
     loadCandidates();
 
     return () => { mounted = false; };
-  }, [forceRefresh]);
+  }, [initialForceRefresh, refreshToggle]);
 
   // Method to update cache and local state optimistically
-  const mutate = (updater: Candidate[] | ((prev: Candidate[]) => Candidate[])) => {
+  const mutate = (updater?: Candidate[] | ((prev: Candidate[]) => Candidate[])) => {
+    if (updater === undefined) {
+      // No argument: trigger a re-fetch
+      setRefreshToggle(prev => prev + 1);
+      return;
+    }
+
     if (typeof updater === 'function') {
       const newData = updater(candidates);
       cachedCandidates = newData;

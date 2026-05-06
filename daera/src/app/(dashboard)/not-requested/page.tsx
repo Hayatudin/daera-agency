@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ClipboardList, Loader2, MoreVertical, CheckCircle, Trash2, Edit3, Eye, Search, UserCheck } from 'lucide-react';
+import { ClipboardList, Loader2, MoreVertical, CheckCircle, Trash2, Edit3, Eye, Search, UserCheck, X } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
 import Input from '@/components/ui/Input';
 import { Candidate } from '@/types';
@@ -33,15 +33,25 @@ export default function NotRequestedPage() {
     setOpenMenuId(null);
     setVisaModalId(null);
     setVisaNumberInput('');
+
+    // 1. Optimistic Update: Immediately move candidate to requested list locally
+    mutate(prev => prev.map(c => 
+      c.id === id ? { ...c, isRequested: true, visaOrContractNumber: visaNum } : c
+    ));
+
     try {
       const res = await fetch(`/api/candidates/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isRequested: true, visaOrContractNumber: visaNum }),
       });
-      if (!res.ok) throw new Error();
-      mutate(prev => prev.map(c => c.id === id ? { ...c, isRequested: true, visaOrContractNumber: visaNum } : c));
-    } catch { alert('Failed to update status'); }
+      
+      // If server definitely failed, we refresh to get the true state
+      if (!res.ok) mutate();
+    } catch (err) {
+      // In case of network error, refresh data from server to stay in sync
+      mutate();
+    }
   };
 
   const deleteCandidate = async (id: string) => {
@@ -144,6 +154,48 @@ export default function NotRequestedPage() {
           </table>
         </div>
       </div>
+      {/* Visa Selection Modal */}
+      {visaModalId && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h2 className="text-lg font-bold text-gray-900">Mark as Visa Selected</h2>
+              <button onClick={() => setVisaModalId(null)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-sm text-gray-500">Enter the Visa or Contract Number for this candidate to move them to the Requested list.</p>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Visa / Contract Number</label>
+                <input
+                  autoFocus
+                  value={visaNumberInput}
+                  onChange={e => setVisaNumberInput(e.target.value)}
+                  placeholder="e.g. 2005095494"
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  onKeyDown={e => e.key === 'Enter' && visaNumberInput && markAsVisaSelected(visaModalId, visaNumberInput)}
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setVisaModalId(null)}
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  disabled={!visaNumberInput}
+                  onClick={() => markAsVisaSelected(visaModalId, visaNumberInput)}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary-hover transition-colors disabled:opacity-50 shadow-lg shadow-primary/20"
+                >
+                  Confirm Selection
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
