@@ -12,11 +12,11 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') ?? '/dashboard';
 
-  const [email, setEmail]       = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPwd, setShowPwd]   = useState(false);
+  const [showPwd, setShowPwd] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError]       = useState('');
+  const [error, setError] = useState('');
 
   // Animated background orbs
   const [mounted, setMounted] = useState(false);
@@ -112,8 +112,8 @@ function LoginForm() {
           </div>
 
           <div className="mb-6 text-center">
-            <h2 className="text-lg font-semibold text-white">Welcome back</h2>
-            <p className="text-white/50 text-sm mt-1">Sign in to access your dashboard</p>
+            <h2 className="text-lg font-semibold text-white">Welcome to Daera</h2>
+
           </div>
 
           {/* Error banner */}
