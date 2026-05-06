@@ -38,7 +38,7 @@ function CVGeneratorContent() {
   const [toast, setToast] = useState<string | null>(null);
   const [isDownloadOpen, setIsDownloadOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-  
+
   // Ref for the CV container to print or capture
   const cvRef = useRef<HTMLDivElement>(null);
 
@@ -64,7 +64,7 @@ function CVGeneratorContent() {
 
     try {
       const htmlToImage = await import('html-to-image');
-      
+
       // Fix: Ensure surname is safely extracted and sanitized for filename
       const rawSurname = selectedCandidate.passportData?.surname || 'Candidate';
       const safeSurname = rawSurname.replace(/[^a-zA-Z0-9]/g, '');
@@ -95,7 +95,7 @@ function CVGeneratorContent() {
         a.download = filename;
         document.body.appendChild(a);
         a.click();
-        
+
         // Critical: Delay cleanup so browser download manager has time to read the 'download' attribute
         setTimeout(() => {
           document.body.removeChild(a);
@@ -109,13 +109,13 @@ function CVGeneratorContent() {
         const blob = await res.blob();
         downloadBlob(blob, `${fileName}.jpg`);
         setToast('CV Downloaded as JPG');
-      } 
+      }
       else if (format === 'pdf') {
         const { jsPDF } = await import('jspdf');
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
-        
+
         const imgProps = pdf.getImageProperties(dataUrl);
         const ratio = imgProps.width / pdfWidth;
         const totalHeightInMm = imgProps.height / ratio;
@@ -126,7 +126,7 @@ function CVGeneratorContent() {
           pdf.addPage();
           pdf.addImage(dataUrl, 'JPEG', 0, -297, pdfWidth, totalHeightInMm);
         }
-        
+
         const pdfBlob = pdf.output('blob');
         downloadBlob(pdfBlob, `${fileName}.pdf`);
         setToast('CV Downloaded as PDF');
@@ -152,7 +152,7 @@ function CVGeneratorContent() {
         downloadBlob(blob, `${fileName}.docx`);
         setToast('Editable DOCX Downloaded!');
       }
-      
+
       // Auto-save the generated CV to the database
       try {
         const saveRes = await fetch('/api/generated-cvs', {
@@ -165,18 +165,18 @@ function CVGeneratorContent() {
             fullBodyPhotoUrl: fullBodyPhoto
           })
         });
-        
+
         if (saveRes.status === 409) {
           setToast('Candidate already generated in that template');
         } else if (!saveRes.ok) {
-           const errText = await saveRes.text();
-           throw new Error(`Status ${saveRes.status}: ${errText}`);
+          const errText = await saveRes.text();
+          throw new Error(`Status ${saveRes.status}: ${errText}`);
         }
       } catch (saveErr) {
         console.error('Failed to auto-save generated CV:', saveErr);
         // Don't show error to user since download succeeded
       }
-      
+
     } catch (err) {
       console.error('Download Error:', err);
       alert('Failed to generate file. Please try again.');
@@ -226,7 +226,7 @@ function CVGeneratorContent() {
         </div>
         {isReady && (
           <div className="relative print:hidden">
-            <Button 
+            <Button
               onClick={() => setIsDownloadOpen(!isDownloadOpen)}
               className="flex items-center gap-2"
               disabled={isDownloading}
