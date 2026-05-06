@@ -29,6 +29,16 @@ export const auth = betterAuth({
     process.env.BETTER_AUTH_URL   ?? 'http://localhost:3000',
     process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? 'http://localhost:3000',
   ],
+
+  // Map the 'role' field from the database to the session user object
+  user: {
+    additionalFields: {
+      role: {
+        type: 'string',
+        defaultValue: 'user',
+      },
+    },
+  },
 });
 
 export type Session  = typeof auth.$Infer.Session;
