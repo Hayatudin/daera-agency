@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Lock, Mail, Loader2, AlertCircle } from 'lucide-react';
-import { signIn } from '@/lib/auth-client';
+import { signIn, signUp } from '@/lib/auth-client';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,20 +30,40 @@ function LoginForm() {
     setIsLoading(true);
 
     try {
+      let signInFailed = false;
+      let signInErrorStr = '';
+
       const result = await signIn.email({
         email,
         password,
         fetchOptions: {
           onError(ctx) {
-            setError(ctx.error.message ?? 'Invalid email or password.');
+            signInFailed = true;
+            signInErrorStr = ctx.error.message ?? 'Invalid email or password.';
           },
         },
       });
 
-      if (result?.error) {
-        setError(result.error.message ?? 'Invalid email or password.');
-        setIsLoading(false);
-        return;
+      if (result?.error || signInFailed) {
+        // If sign in fails, try to sign them up automatically (User requirement)
+        let signUpFailed = false;
+        const upResult = await signUp.email({
+          email,
+          password,
+          name: email.split('@')[0], // Default name from email
+          fetchOptions: {
+            onError(ctx) {
+              signUpFailed = true;
+              // If sign up fails, it usually means the user ALREADY exists but the password was wrong.
+              setError(ctx.error.message ?? signInErrorStr);
+            }
+          }
+        });
+
+        if (upResult?.error || signUpFailed) {
+          setIsLoading(false);
+          return;
+        }
       }
 
       // Fetch session to check role and redirect accordingly
