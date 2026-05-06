@@ -1,26 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { v2 as cloudinary } from 'cloudinary';
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-async function uploadToCloudinary(fileString: string | null | undefined, folder: string) {
-  if (!fileString || !fileString.startsWith('data:image')) return fileString;
-  try {
-    const result = await cloudinary.uploader.upload(fileString, {
-      folder: `daera/${folder}`,
-      resource_type: 'auto',
-    });
-    return result.secure_url;
-  } catch (err) {
-    console.error(`Cloudinary upload error for ${folder}:`, err);
-    return null;
-  }
-}
+import { uploadToLocal } from '@/lib/upload';
 
 export const dynamic = 'force-dynamic';
 
@@ -71,10 +51,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Candidate already generated in that template' }, { status: 409 });
     }
     
-    // Upload photos to Cloudinary if they are base64
+    // Upload photos locally if they are base64
     const [faceUrl, fullBodyUrl] = await Promise.all([
-      uploadToCloudinary(facePhotoUrl, 'faces'),
-      uploadToCloudinary(fullBodyPhotoUrl, 'fullbody')
+      uploadToLocal(facePhotoUrl, 'faces'),
+      uploadToLocal(fullBodyPhotoUrl, 'fullbody')
     ]);
 
     // Auto-set deadline to 30 days from now

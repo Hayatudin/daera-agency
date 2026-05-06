@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "DAERA - Foreign Employment Agency",
-  description: "DAERA Employment Agency - Connecting Ethiopian talent with Gulf country opportunities through reliable, professional recruitment services.",
+  title: "CoolStaff Foreign Employment Agency",
+  description: "CoolStaff Employment Agency - Connecting Ethiopian talent with Gulf country opportunities through reliable, professional recruitment services.",
 };
 
 export default function RootLayout({
@@ -24,3 +24,4 @@ export default function RootLayout({
     </html>
   );
 }
+ 

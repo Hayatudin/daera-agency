@@ -1,27 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { v2 as cloudinary } from 'cloudinary';
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-async function uploadToCloudinary(fileString: string | null | undefined, folder: string) {
-  if (!fileString) return null;
-  if (fileString.startsWith('http')) return fileString;
-  try {
-    const result = await cloudinary.uploader.upload(fileString, {
-      folder: `daera/${folder}`,
-      resource_type: 'auto'
-    });
-    return result.secure_url;
-  } catch (err) {
-    console.error(`Cloudinary upload error for ${folder}:`, err);
-    return null;
-  }
-}
+import { uploadToLocal } from '@/lib/upload';
 
 export async function GET() {
   try {
@@ -119,14 +98,14 @@ export async function POST(request: Request) {
       labourIdUrl,
       count
     ] = await Promise.all([
-      uploadToCloudinary(body.passportImageUrl, 'passports'),
-      uploadToCloudinary(body.facePhotoUrl, 'faces'),
-      uploadToCloudinary(body.fullBodyPhotoUrl, 'fullbody'),
-      uploadToCloudinary(body.personalInfo.cocDocumentUrl, 'coc'),
-      uploadToCloudinary(body.personalInfo.medicalDocumentUrl, 'medical'),
-      uploadToCloudinary(body.personalInfo.candidateIdImageUrl, 'candidate-id'),
-      uploadToCloudinary(body.personalInfo.relativeIdImageUrl, 'relative-id'),
-      uploadToCloudinary(body.personalInfo.labourIdUrl, 'labour-id'),
+      uploadToLocal(body.passportImageUrl, 'passports'),
+      uploadToLocal(body.facePhotoUrl, 'faces'),
+      uploadToLocal(body.fullBodyPhotoUrl, 'fullbody'),
+      uploadToLocal(body.personalInfo.cocDocumentUrl, 'coc'),
+      uploadToLocal(body.personalInfo.medicalDocumentUrl, 'medical'),
+      uploadToLocal(body.personalInfo.candidateIdImageUrl, 'candidate-id'),
+      uploadToLocal(body.personalInfo.relativeIdImageUrl, 'relative-id'),
+      uploadToLocal(body.personalInfo.labourIdUrl, 'labour-id'),
       prisma.candidate.count()
     ]);
 
