@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useSession, signOut } from '@/lib/auth-client';
+import { LogOut, LayoutDashboard, User, ChevronDown, Loader2 } from 'lucide-react';
 
 const BRAND = '#2A276C';
 
@@ -47,12 +49,35 @@ export default function HomePage() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  const { data: session, isPending } = useSession();
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 30);
     window.addEventListener('scroll', fn);
-    return () => window.removeEventListener('scroll', fn);
+    
+    const clickOutside = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', clickOutside);
+    
+    return () => {
+      window.removeEventListener('scroll', fn);
+      document.removeEventListener('mousedown', clickOutside);
+    };
   }, []);
+
+  const handleLogout = async () => {
+    await signOut();
+    window.location.reload();
+  };
+
+  const role = (session?.user as any)?.role ?? 'user';
+  const canAccessDashboard = ['super_admin', 'admin', 'agency'].includes(role);
 
   return (
     <div className="font-[Inter,sans-serif] bg-white text-gray-900 overflow-x-hidden">
@@ -78,9 +103,45 @@ export default function HomePage() {
 
           {/* Right */}
           <div className="hidden lg:flex items-center gap-2">
-            <Link href="/dashboard" className="px-4 py-2 text-[13px] font-semibold text-gray-600 hover:text-[#2A276C] transition-colors">
-              Sign In
-            </Link>
+            {isPending ? (
+              <div className="px-4 py-2"><Loader2 className="w-5 h-5 animate-spin text-gray-400" /></div>
+            ) : session ? (
+              <div className="relative" ref={profileRef}>
+                <button 
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  className="flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-full border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all"
+                >
+                  <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs uppercase">
+                    {session.user.name?.charAt(0) || 'U'}
+                  </div>
+                  <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {profileOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl shadow-black/10 border border-gray-100 py-2 z-50 animate-in fade-in zoom-in duration-200">
+                    <div className="px-4 py-2 border-b border-gray-50 mb-1">
+                      <p className="text-[13px] font-bold text-gray-900 truncate">{session.user.name}</p>
+                      <p className="text-[10px] text-gray-400 truncate">{session.user.email}</p>
+                    </div>
+                    {canAccessDashboard && (
+                      <Link href="/dashboard" className="flex items-center gap-2 px-4 py-2 text-[13px] text-gray-600 hover:bg-gray-50 hover:text-indigo-600 transition-colors">
+                        <LayoutDashboard size={14} /> Dashboard
+                      </Link>
+                    )}
+                    <button 
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2 px-4 py-2 text-[13px] text-red-500 hover:bg-red-50 transition-colors"
+                    >
+                      <LogOut size={14} /> Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link href="/login" className="px-4 py-2 text-[13px] font-semibold text-gray-600 hover:text-[#2A276C] transition-colors">
+                Sign In
+              </Link>
+            )}
             <Link href="#contact" className="px-5 py-2.5 text-[13px] font-bold text-white rounded-full shadow-lg hover:-translate-y-0.5 transition-all" style={{ background: BRAND, boxShadow: '0 8px 24px rgba(42,39,108,0.25)' }}>
               Contact Us
             </Link>
@@ -99,7 +160,17 @@ export default function HomePage() {
         {mobileMenu && (
           <div className="lg:hidden mt-3 pt-3 pb-4 border-t border-gray-100 px-3 space-y-1">
             {NAV_LINKS.map(l => (<a key={l.href} href={l.href} onClick={() => setMobileMenu(false)} className="block text-sm font-semibold text-gray-600 py-2.5 hover:text-[#2A276C]">{l.label}</a>))}
-            <Link href="/dashboard" className="block text-center mt-3 px-5 py-2.5 text-white rounded-full text-sm font-bold" style={{ background: BRAND }}>Sign In</Link>
+            {session ? (
+              <>
+                <div className="px-3 py-2 text-xs font-bold text-gray-400 uppercase tracking-widest pt-4">Account</div>
+                {canAccessDashboard && (
+                  <Link href="/dashboard" className="block px-3 py-2 text-sm font-semibold text-gray-600">Dashboard</Link>
+                )}
+                <button onClick={handleLogout} className="block w-full text-left px-3 py-2 text-sm font-semibold text-red-500">Sign Out</button>
+              </>
+            ) : (
+              <Link href="/login" className="block text-center mt-3 px-5 py-2.5 text-white rounded-full text-sm font-bold" style={{ background: BRAND }}>Sign In</Link>
+            )}
           </div>
         )}
       </nav>

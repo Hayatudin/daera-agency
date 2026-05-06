@@ -30,7 +30,7 @@ export async function middleware(request: NextRequest) {
   const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p));
   if (!isProtected) return NextResponse.next();
 
-  // Quickly check if a session cookie exists (lightweight check, no DB call)
+  // Check if a session cookie exists
   const sessionCookie = getSessionCookie(request);
 
   if (!sessionCookie) {
@@ -40,29 +40,37 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // For super-admin-only paths we need to verify the role via an internal API call
-  const isSuperAdminOnly = SUPER_ADMIN_ONLY.some((p) => pathname.startsWith(p));
-
-  if (isSuperAdminOnly) {
-    try {
-      const sessionRes = await fetch(
-        new URL('/api/auth/session', request.url),
-        {
-          headers: { cookie: request.headers.get('cookie') ?? '' },
-          cache: 'no-store',
-        }
-      );
-      const session = await sessionRes.json();
-      const role: string = session?.user?.role ?? 'user';
-
-      if (role !== 'super_admin') {
-        // Authenticated but not super admin — redirect to dashboard
-        return NextResponse.redirect(new URL('/dashboard', request.url));
+  // Fetch session to verify role
+  try {
+    const sessionRes = await fetch(
+      new URL('/api/auth/session', request.url),
+      {
+        headers: { cookie: request.headers.get('cookie') ?? '' },
+        cache: 'no-store',
       }
-    } catch {
-      // If session check fails, redirect to login to be safe
+    );
+    const session = await sessionRes.json();
+    
+    // If no valid session data returned, treat as unauthenticated
+    if (!session || !session.user) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
+
+    const role: string = session.user.role ?? 'user';
+    const isSuperAdminOnly = SUPER_ADMIN_ONLY.some((p) => pathname.startsWith(p));
+
+    // 1. Block 'user' role from ANY protected path
+    if (role === 'user') {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+
+    // 2. Block non-super-admins from super-admin-only paths
+    if (isSuperAdminOnly && role !== 'super_admin') {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+  } catch (err) {
+    console.error('Middleware session check failed:', err);
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
   return NextResponse.next();

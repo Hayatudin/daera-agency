@@ -61,7 +61,8 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
 
   const handleLogout = async () => {
     await signOut();
-    router.push('/login');
+    // Force a full reload to clear all caches and states
+    window.location.href = '/login';
   };
 
   return (
