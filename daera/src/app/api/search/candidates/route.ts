@@ -13,9 +13,9 @@ export async function GET(request: Request) {
     const candidates = await prisma.candidate.findMany({
       where: {
         OR: [
-          { givenNames: { contains: query, mode: 'insensitive' } },
-          { surname: { contains: query, mode: 'insensitive' } },
-          { passportNumber: { contains: query, mode: 'insensitive' } },
+          { givenNames: { contains: query } },
+          { surname: { contains: query } },
+          { passportNumber: { contains: query } },
         ],
       },
       take: 5,
