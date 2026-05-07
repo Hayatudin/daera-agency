@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       // Fallback for new custom templates that don't have a specific DOCX template yet
       templateFileName = 'CV ALM.docx';
     }
-    
+
     const templatePath = path.join(process.cwd(), 'templates', templateFileName);
 
     if (!fs.existsSync(templatePath)) {
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       docXml = docXml.replace(/<w:rPr>([\s\S]*?)<\/w:rPr>/g, (match, inner) => {
         // Remove shading (background color)
         inner = inner.replace(/<w:shd[^>]*\/>/g, '');
-      // Remove explicit font color (forces default black)
+        // Remove explicit font color (forces default black)
         inner = inner.replace(/<w:color[^>]*\/>/g, '');
         return `<w:rPr>${inner}</w:rPr>`;
       });
@@ -107,9 +107,9 @@ export async function POST(request: Request) {
           inner = inner.replace(/<w:rFonts[^>]*\/>/g, '');
           inner = inner.replace(/<w:sz[^>]*\/>/g, '');
           inner = inner.replace(/<w:szCs[^>]*\/>/g, '');
-          
+
           const fontStyles = '<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman" w:eastAsia="Times New Roman"/><w:sz w:val="20"/><w:szCs w:val="20"/>';
-          
+
           if (inner.includes('<w:rPr>')) {
             inner = inner.replace('<w:rPr>', '<w:rPr>' + fontStyles);
           } else {
@@ -134,9 +134,9 @@ export async function POST(request: Request) {
         // Default sizes for CV photos
         if (tagName === 'facePhoto' || tagName === 'photo') return [150, 180];
         if (tagName === 'fullBodyPhoto') {
-           // If we are generating for ALM, the box is ~350x545 points. Size it to fit precisely!
-           if (templateId === 'tmpl-alm') return [350, 545];
-           return [550, 750]; 
+          // If we are generating for ALM, the box is ~350x545 points. Size it to fit precisely!
+          if (templateId === 'tmpl-alm') return [350, 545];
+          return [550, 750];
         }
         if (tagName === 'passport image' || tagName === 'passportPhoto') return [550, 750];
         return [150, 150];
@@ -150,8 +150,13 @@ export async function POST(request: Request) {
     });
 
     // Skill Check Helpers
-    const skillsArray = candidate.skills || [];
-    const langsArray = candidate.languages || [];
+    const skillsArray = Array.isArray(candidate.skills)
+      ? candidate.skills.map(String)
+      : [];
+
+    const langsArray = Array.isArray(candidate.languages)
+      ? candidate.languages.map(String)
+      : [];
 
     const hasSkill = (keyword: string) =>
       skillsArray.some(s => s.toLowerCase().includes(keyword.toLowerCase())) ? 'Yes' : 'No';
