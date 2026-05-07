@@ -5,7 +5,7 @@ import prismaAuth from './prisma-auth';
 export const auth = betterAuth({
   // Use the standard (non-serverless) Prisma client
   database: prismaAdapter(prismaAuth, {
-    provider: 'postgresql',
+    provider: 'mysql',
   }),
 
   // Email + password authentication

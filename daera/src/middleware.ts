@@ -24,6 +24,9 @@ const PROTECTED_PATHS = [
 const SUPER_ADMIN_ONLY = ['/users'];
 
 export async function middleware(request: NextRequest) {
+  // Temporary bypass for all authentication
+  return NextResponse.next();
+
   const { pathname } = request.nextUrl;
 
   // Check if the request is for a protected path
