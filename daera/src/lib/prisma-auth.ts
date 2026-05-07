@@ -1,7 +1,7 @@
 /**
  * Standard PrismaClient for Better Auth.
- * Better Auth's Prisma adapter requires a non-serverless Prisma client,
- * so we keep a separate instance here alongside the Neon-based one.
+ * We use a separate instance for authentication to ensure clean separation
+ * and consistent database access across the app.
  */
 import { PrismaClient } from '@prisma/client';
 
