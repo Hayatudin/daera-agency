@@ -60,7 +60,7 @@ function RegistrationContent() {
       try {
         const res = await fetch('/api/brokers');
         const data = await res.json();
-        setBrokers(data);
+        setBrokers(Array.isArray(data) ? data : []);
       } catch { /* ignore */ }
     }
     fetchBrokers();

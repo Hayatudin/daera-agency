@@ -4,18 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "node server.js",
     "lint": "eslint",
     "postinstall": "prisma generate"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
-    "@neondatabase/serverless": "^0.10.4",
-    "@prisma/adapter-neon": "^6.4.1",
     "@prisma/client": "^6.4.1",
     "better-auth": "^1.6.9",
-    "cloudinary": "^2.10.0",
     "docx": "^9.6.1",
     "docxtemplater": "^3.68.5",
     "docxtemplater-image-module-free": "^1.1.1",
@@ -31,7 +28,6 @@
     "next": "16.2.4",
     "pdf-parse": "^1.1.1",
     "pizzip": "^3.2.0",
-    "playwright": "^1.59.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "sharp": "^0.34.5",

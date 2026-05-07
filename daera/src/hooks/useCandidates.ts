@@ -41,10 +41,10 @@ export function useCandidates(initialForceRefresh = false) {
 
       try {
         const data = await fetchPromise;
-        cachedCandidates = data;
+        cachedCandidates = Array.isArray(data) ? data : [];
         lastFetchTime = Date.now();
         if (mounted) {
-          setCandidates(data);
+          setCandidates(Array.isArray(data) ? data : []);
           setError(null);
         }
       } catch (err) {
