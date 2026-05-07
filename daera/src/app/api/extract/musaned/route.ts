@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 import { parseMusanedText } from '@/lib/parsers/musaned';
+
+export const maxDuration = 30; // Allow up to 30 seconds for PDF processing
 
 export async function POST(request: Request) {
   try {
@@ -18,21 +19,14 @@ export async function POST(request: Request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
+    // Dynamic import to avoid Vercel bundling issues with pdf-parse
+    const pdfParse = (await import('pdf-parse/lib/pdf-parse.js')).default;
+
     // Read the PDF
     const pdfData = await pdfParse(buffer);
     
-    // Debug: Log the raw extracted text
-    console.log('=== RAW PDF TEXT ===');
-    console.log(pdfData.text);
-    console.log('=== END RAW TEXT ===');
-    
     // Parse the extracted text
     const extractedData = parseMusanedText(pdfData.text);
-    
-    // Debug: Log what was extracted
-    console.log('=== EXTRACTED DATA ===');
-    console.log(JSON.stringify(extractedData, null, 2));
-    console.log('=== END EXTRACTED ===');
 
     return NextResponse.json({
       success: true,

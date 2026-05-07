@@ -12,6 +12,7 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.4.1",
+    "cloudinary": "^2.10.0",
     "better-auth": "^1.6.9",
     "docx": "^9.6.1",
     "docxtemplater": "^3.68.5",

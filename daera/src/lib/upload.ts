@@ -1,15 +1,64 @@
+import { v2 as cloudinary } from 'cloudinary';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
 
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Set STORAGE_MODE=local in .env for cPanel (local NVMe storage)
+// Set STORAGE_MODE=cloudinary in .env for Vercel (cloud storage)
+const isLocal = process.env.STORAGE_MODE === 'local';
+
+/**
+ * Upload a base64 file string to either Cloudinary or local storage.
+ * Controlled by the STORAGE_MODE environment variable.
+ */
 export async function uploadToLocal(fileString: string | null | undefined, folder: string) {
   if (!fileString) return null;
-  
-  // If it's already a URL (e.g. from existing DB records or previous uploads), just return it
+
+  // If it's already a URL, just return it
   if (fileString.startsWith('http') || fileString.startsWith('/uploads')) return fileString;
 
+  // Route to the correct storage backend
+  if (isLocal) {
+    return uploadToLocalDisk(fileString, folder);
+  } else {
+    return uploadToCloudinary(fileString, folder);
+  }
+}
+
+/**
+ * Upload to Cloudinary (used on Vercel)
+ */
+async function uploadToCloudinary(fileString: string, folder: string): Promise<string | null> {
   try {
-    // Expected format: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
+    let dataUri = fileString;
+    if (!fileString.startsWith('data:')) {
+      dataUri = `data:image/jpeg;base64,${fileString}`;
+    }
+
+    const result = await cloudinary.uploader.upload(dataUri, {
+      folder: `daera/${folder}`,
+      resource_type: 'auto',
+    });
+
+    return result.secure_url;
+  } catch (err) {
+    console.error(`Cloudinary upload error for ${folder}:`, err);
+    return null;
+  }
+}
+
+/**
+ * Upload to local disk (used on cPanel)
+ */
+async function uploadToLocalDisk(fileString: string, folder: string): Promise<string | null> {
+  try {
     let base64Data = fileString;
     let extension = 'bin';
 
@@ -24,21 +73,18 @@ export async function uploadToLocal(fileString: string | null | undefined, folde
         base64Data = fileString.split(',')[1] || fileString;
       }
     } else {
-      // Default to jpg if it's raw base64
       extension = 'jpg';
     }
 
     const buffer = Buffer.from(base64Data, 'base64');
     const fileName = `${crypto.randomBytes(16).toString('hex')}.${extension}`;
-    
-    // Create folder path: public/uploads/{folder}
+
     const uploadDir = path.join(process.cwd(), 'public', 'uploads', folder);
     await mkdir(uploadDir, { recursive: true });
-    
+
     const filePath = path.join(uploadDir, fileName);
     await writeFile(filePath, buffer);
-    
-    // Return relative URL for Next.js to serve from /public
+
     return `/uploads/${folder}/${fileName}`;
   } catch (err) {
     console.error(`Local upload error for ${folder}:`, err);
