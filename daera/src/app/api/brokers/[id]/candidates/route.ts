@@ -14,7 +14,7 @@ export async function GET(
     const endDateParam = searchParams.get('endDate');
 
     let dateFilter = {};
-    
+
     if (startDateParam || endDateParam) {
       dateFilter = {
         registeredAt: {
@@ -25,13 +25,13 @@ export async function GET(
     } else if (interval !== 'ALL') {
       const now = new Date();
       const startDate = new Date();
-      
+
       if (interval === '1D') startDate.setDate(now.getDate() - 1);
       else if (interval === '1W') startDate.setDate(now.getDate() - 7);
       else if (interval === '1M') startDate.setMonth(now.getMonth() - 1);
       else if (interval === '3M') startDate.setMonth(now.getMonth() - 3);
       else if (interval === '1Y') startDate.setFullYear(now.getFullYear() - 1);
-      
+
       dateFilter = {
         registeredAt: {
           gte: startDate,
@@ -47,9 +47,9 @@ export async function GET(
             AND: [
               {
                 OR: [
-                  { givenNames: { contains: search, mode: 'insensitive' } },
-                  { surname: { contains: search, mode: 'insensitive' } },
-                  { passportNumber: { contains: search, mode: 'insensitive' } },
+                  { givenNames: { contains: search } },
+                  { surname: { contains: search } },
+                  { passportNumber: { contains: search } },
                 ],
               },
               dateFilter,
