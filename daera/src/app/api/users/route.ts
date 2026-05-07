@@ -7,8 +7,7 @@ import prisma from '@/lib/prisma';
 async function requireSuperAdmin() {
   // Temporary bypass
   return { user: { role: 'super_admin' } } as any;
-
-  const session = await auth.api.getSession({ headers: await headers() });
+}
 
 // GET /api/users — list all users
 export async function GET() {

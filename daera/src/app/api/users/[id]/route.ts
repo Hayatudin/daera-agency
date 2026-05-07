@@ -6,8 +6,7 @@ import prisma from '@/lib/prisma';
 async function requireSuperAdmin() {
   // Temporary bypass
   return { user: { role: 'super_admin', id: 'mock-id' } } as any;
-
-  const session = await auth.api.getSession({ headers: await headers() });
+}
 
 // PATCH /api/users/[id] — update user role
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
