@@ -9,7 +9,7 @@ const PROTECTED_PATHS = [
   '/dashboard',
   '/candidates',
   '/requested',
-  '/not-requested',
+
   '/fit-candidates',
   '/brokers',
   '/registration',
@@ -84,7 +84,7 @@ export const config = {
     '/dashboard/:path*',
     '/candidates/:path*',
     '/requested/:path*',
-    '/not-requested/:path*',
+
     '/fit-candidates/:path*',
     '/brokers/:path*',
     '/registration/:path*',

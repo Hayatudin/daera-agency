@@ -25,7 +25,6 @@ const baseNavItems = [
   { label: 'Dashboard',        href: '/dashboard',      icon: LayoutDashboard },
   { label: 'Candidates',       href: '/candidates',     icon: Users           },
   { label: 'Visa Selected',    href: '/requested',      icon: ClipboardList   },
-  { label: 'Not Visa Selected',href: '/not-requested',  icon: ClipboardList   },
   { label: 'Fit Candidates',   href: '/fit-candidates', icon: UserCheck       },
   { label: 'Brokers',          href: '/brokers',        icon: Users           },
   { label: 'Registration',     href: '/registration',   icon: UserPlus        },

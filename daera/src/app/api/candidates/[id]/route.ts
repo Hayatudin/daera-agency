@@ -191,6 +191,19 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
 
+    // If marking as Unfit, also move CV to backup (isRequested = true)
+    if (body.medicalStatus === 'Unfit') {
+      body.isRequested = true;
+    }
+
+    // If restoring from backup (cancelling visa), also reset Unfit status
+    if (body.isRequested === false) {
+      const current = await prisma.candidate.findUnique({ where: { id }, select: { medicalStatus: true } });
+      if (current?.medicalStatus === 'Unfit') {
+        body.medicalStatus = 'Pending';
+      }
+    }
+
     const updated = await prisma.candidate.update({
       where: { id },
       data: body,

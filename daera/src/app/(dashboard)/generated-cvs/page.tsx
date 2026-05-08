@@ -334,7 +334,7 @@ export default function GeneratedCVsPage() {
       const res = await fetch('/api/generated-cvs', { cache: 'no-store' });
       if (!res.ok) throw new Error('Failed');
       const data = await res.json();
-      setCvs(data.filter((c: any) => !c.candidate.isRequested));
+      setCvs(data.filter((c: any) => !c.candidate.isRequested && c.candidate.medicalStatus !== 'Unfit'));
     } catch {
       showToast('Failed to load CVs', 'error');
     } finally {
