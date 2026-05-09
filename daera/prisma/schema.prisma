@@ -172,3 +172,26 @@ model Verification {
 
   @@index([identifier])
 }
+
+// ── Quick Registration (Walk-in candidates for Musaned) ───────────────────────
+
+model QuickRegistration {
+  id               String   @id @default(cuid())
+  passportNumber   String
+  surname          String
+  givenNames       String
+  dateOfBirth      String?
+  gender           String?
+  nationality      String?
+  dateOfExpiry     String?
+  issuingCountry   String?
+  placeOfBirth     String?
+  educationLevel   String?
+  jobExperience    String?
+  maritalStatus    String?
+  numberOfChildren Int      @default(0)
+  passportImageUrl String?  @db.Text
+  createdAt        DateTime @default(now())
+
+  @@index([createdAt])
+}

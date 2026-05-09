@@ -30,6 +30,7 @@ const baseNavItems = [
   { label: 'Brokers',          href: '/brokers',        icon: Users           },
   { label: 'Registration',     href: '/registration',   icon: UserPlus        },
   { label: 'Quick Registration', href: '/quick-registration', icon: ClipboardList },
+  { label: 'Quick Registered', href: '/quick-registered', icon: Users       },
   { label: 'CV Generator',     href: '/cv-generator',   icon: FileText        },
   { label: 'Generated CVs',    href: '/generated-cvs',  icon: FolderOpen      },
   { label: 'Backup CVs',       href: '/backup',         icon: FolderOpen      },
