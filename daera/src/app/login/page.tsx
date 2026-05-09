@@ -74,7 +74,10 @@ function LoginForm() {
       if (signUpError.message?.toLowerCase().includes('already exists') || signUpError.code === 'USER_ALREADY_EXISTS') {
         setError('Invalid email or password');
       } else {
-        setError(signUpError.message || signInError.message || 'Authentication failed');
+        // Show the actual error from the server to help debugging
+        const errorMessage = signUpError.message || signInError.message || 'Authentication failed';
+        setError(errorMessage);
+        console.error("Auth Fail Details:", { signInError, signUpError });
       }
       
     } catch (err: any) {
