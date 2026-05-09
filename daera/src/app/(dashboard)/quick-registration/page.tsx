@@ -189,7 +189,7 @@ export default function QuickRegistrationPage() {
       </div>
 
       {/* ACTION BAR */}
-      <div className="fixed bottom-0 left-0 right-0 bg-surface/80 backdrop-blur-md border-t border-border p-4 z-40 md:pl-64">
+      <div className="fixed bottom-0 left-0 right-0 bg-surface/80 backdrop-blur-md border-t border-border p-3 sm:p-4 z-30 lg:pl-64">
         <div className="max-w-4xl mx-auto flex justify-end">
           <button
             onClick={handleSave}

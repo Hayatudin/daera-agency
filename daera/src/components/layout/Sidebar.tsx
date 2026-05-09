@@ -18,6 +18,7 @@ import {
   UserCheck,
   ShieldCheck,
   Loader2,
+  X,
 } from 'lucide-react';
 
 // Base nav items shown to all dashboard roles
@@ -45,9 +46,11 @@ const superAdminNavItem = {
 interface SidebarProps {
   isCollapsed: boolean;
   setIsCollapsed: (v: boolean | ((prev: boolean) => boolean)) => void;
+  isMobile?: boolean;
+  onNavigate?: () => void;
 }
 
-export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
+export default function Sidebar({ isCollapsed, setIsCollapsed, isMobile, onNavigate }: SidebarProps) {
   const pathname  = usePathname();
   const router    = useRouter();
   const { data: session, isPending } = useSession();
@@ -65,28 +68,37 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
     window.location.href = '/login';
   };
 
+  const handleNavClick = () => {
+    if (onNavigate) onNavigate();
+  };
+
   return (
     <aside
       className={cn(
         'relative shrink-0 h-screen bg-gradient-to-b from-sidebar-from to-sidebar-to flex flex-col z-40 transition-all duration-300',
-        isCollapsed ? 'w-20' : 'w-64'
+        isMobile ? 'w-72' : (isCollapsed ? 'w-20' : 'w-64')
       )}
     >
-      {/* Logo */}
-      <div className={cn('flex items-center pt-7 pb-2 transition-all duration-300', isCollapsed ? 'justify-center px-0' : 'gap-3 px-6')}>
+      {/* Logo + Mobile close */}
+      <div className={cn('flex items-center pt-7 pb-2 transition-all duration-300', isCollapsed && !isMobile ? 'justify-center px-0' : 'gap-3 px-6')}>
         <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-sm flex shrink-0 items-center justify-center border border-white/10">
           <span className="text-white font-bold text-lg">D</span>
         </div>
-        {!isCollapsed && (
-          <div className="overflow-hidden whitespace-nowrap transition-all duration-300">
+        {(!isCollapsed || isMobile) && (
+          <div className="overflow-hidden whitespace-nowrap transition-all duration-300 flex-1">
             <h1 className="text-white font-bold text-xl tracking-wide">DAERA</h1>
             <p className="text-white/40 text-[10px] tracking-[0.2em] uppercase">Employment Agency</p>
           </div>
         )}
+        {isMobile && (
+          <button onClick={onNavigate} className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+            <X size={20} />
+          </button>
+        )}
       </div>
 
       {/* Role badge */}
-      {!isCollapsed && !isPending && session && (
+      {(!isCollapsed || isMobile) && !isPending && session && (
         <div className="px-6 pb-3">
           <span className={cn(
             'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider',
@@ -112,20 +124,21 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
+              onClick={handleNavClick}
               className={cn(
                 'flex items-center rounded-lg transition-all duration-200 group relative',
-                isCollapsed ? 'justify-center py-3' : 'gap-3 px-4 py-2.5',
+                isCollapsed && !isMobile ? 'justify-center py-3' : 'gap-3 px-4 py-2.5',
                 isActive
                   ? 'bg-white/15 text-white shadow-none'
                   : 'text-white/60 hover:bg-white/10 hover:text-white/90'
               )}
-              title={isCollapsed ? item.label : undefined}
+              title={isCollapsed && !isMobile ? item.label : undefined}
             >
               <Icon size={18} className={cn('shrink-0 transition-transform duration-200', !isActive && 'group-hover:scale-110')} />
-              {!isCollapsed && (
+              {(!isCollapsed || isMobile) && (
                 <span className="text-sm font-medium whitespace-nowrap">{item.label}</span>
               )}
-              {isActive && !isCollapsed && (
+              {isActive && (!isCollapsed || isMobile) && (
                 <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
               )}
             </Link>
@@ -136,7 +149,7 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
       {/* Bottom section — user info + logout */}
       <div className="px-3 pb-6 space-y-1 border-t border-white/10 pt-3 mt-2">
         {/* User info */}
-        {!isCollapsed && session?.user && (
+        {(!isCollapsed || isMobile) && session?.user && (
           <div className="px-4 py-3 mb-2 bg-white/5 rounded-xl border border-white/5 mx-1">
             <div className="flex items-center gap-2 mb-1">
               <p className="text-white/90 text-sm font-bold truncate leading-none">{session.user.name}</p>
@@ -155,25 +168,27 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
           onClick={handleLogout}
           className={cn(
             'flex items-center rounded-lg text-white/40 hover:text-red-400 hover:bg-red-400/10 transition-all duration-200 w-full cursor-pointer',
-            isCollapsed ? 'justify-center py-3' : 'gap-3 px-4 py-2.5'
+            isCollapsed && !isMobile ? 'justify-center py-3' : 'gap-3 px-4 py-2.5'
           )}
-          title={isCollapsed ? 'Logout' : undefined}
+          title={isCollapsed && !isMobile ? 'Logout' : undefined}
         >
           {isPending
             ? <Loader2 size={18} className="shrink-0 animate-spin" />
             : <LogOut size={18} className="shrink-0" />
           }
-          {!isCollapsed && <span className="text-sm whitespace-nowrap">Logout</span>}
+          {(!isCollapsed || isMobile) && <span className="text-sm whitespace-nowrap">Logout</span>}
         </button>
       </div>
 
-      {/* Collapse button */}
-      <button
-        onClick={() => setIsCollapsed(prev => !prev)}
-        className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-surface border border-border rounded-full flex items-center justify-center shadow-sm cursor-pointer hover:bg-primary hover:text-white hover:border-primary transition-all duration-200 z-50"
-      >
-        <ChevronLeft size={12} className={cn('transition-transform duration-300', isCollapsed && 'rotate-180')} />
-      </button>
+      {/* Collapse button — desktop only */}
+      {!isMobile && (
+        <button
+          onClick={() => setIsCollapsed(prev => !prev)}
+          className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-surface border border-border rounded-full flex items-center justify-center shadow-sm cursor-pointer hover:bg-primary hover:text-white hover:border-primary transition-all duration-200 z-50"
+        >
+          <ChevronLeft size={12} className={cn('transition-transform duration-300', isCollapsed && 'rotate-180')} />
+        </button>
+      )}
     </aside>
   );
 }

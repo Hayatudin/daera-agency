@@ -70,17 +70,17 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 animate-fade-in pb-10">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Dashboard</h1>
-          <p className="text-text-secondary mt-1">Overview of candidate registrations and quick actions</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-text-primary">Dashboard</h1>
+          <p className="text-text-secondary text-sm sm:text-base mt-1">Overview of candidate registrations and quick actions</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <Link href="/registration">
             <Button variant="primary" icon={<UserPlus size={16} />}>ADD CANDIDATE</Button>
           </Link>
-          <a href={MUSANED_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#2a9d8f] to-[#238b80] hover:from-[#238b80] hover:to-[#1d7a71] text-white rounded-xl font-semibold text-sm shadow-lg shadow-[#2a9d8f]/25 transition-all duration-200 hover:shadow-xl hover:shadow-[#2a9d8f]/30 hover:-translate-y-0.5">
-            <ExternalLink size={16} /> Go to Musaned
+          <a href={MUSANED_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-[#2a9d8f] to-[#238b80] hover:from-[#238b80] hover:to-[#1d7a71] text-white rounded-xl font-semibold text-xs sm:text-sm shadow-lg shadow-[#2a9d8f]/25 transition-all duration-200 hover:shadow-xl hover:shadow-[#2a9d8f]/30 hover:-translate-y-0.5">
+            <ExternalLink size={16} /> <span className="hidden sm:inline">Go to</span> Musaned
           </a>
         </div>
       </div>
