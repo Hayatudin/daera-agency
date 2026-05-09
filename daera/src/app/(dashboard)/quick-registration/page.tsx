@@ -223,6 +223,7 @@ export default function QuickRegistrationPage() {
                         <Select
                           label="Country"
                           required
+                          searchable
                           options={allCountries.map(c => ({ value: c.toUpperCase(), label: c.toUpperCase() }))}
                           value={exp.country}
                           onChange={v => updateExperience(index, 'country', v)}

@@ -187,10 +187,10 @@ model QuickRegistration {
   issuingCountry   String?
   placeOfBirth     String?
   educationLevel   String?
-  jobExperience    String?
+  jobExperience    String?  @db.LongText
   maritalStatus    String?
   numberOfChildren Int      @default(0)
-  passportImageUrl String?  @db.Text
+  passportImageUrl String?  @db.LongText
   createdAt        DateTime @default(now())
 
   @@index([createdAt])

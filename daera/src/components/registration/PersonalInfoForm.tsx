@@ -294,6 +294,7 @@ export default function PersonalInfoForm({ data, onChange, passportData, onPassp
                   <Select
                     label="Country"
                     required
+                    searchable
                     options={allCountries.map(c => ({ value: c.toUpperCase(), label: c.toUpperCase() }))}
                     value={exp.country}
                     onChange={v => updateExperience(index, 'country', v)}
@@ -364,7 +365,7 @@ export default function PersonalInfoForm({ data, onChange, passportData, onPassp
         <h3 className="text-xl font-bold text-text-primary mb-6">Address</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
-          <Select label="Country" options={allCountries.map(c => ({ value: c.toUpperCase(), label: c.toUpperCase() }))} value={data.country} onChange={v => onChange('country', v)} placeholder="Select country" />
+          <Select label="Country" searchable options={allCountries.map(c => ({ value: c.toUpperCase(), label: c.toUpperCase() }))} value={data.country} onChange={v => onChange('country', v)} placeholder="Select country" />
           <Input label="City" value={data.city} onChange={e => { handleChangeUpper('city', e.target.value); handlePassportChangeUpper('placeOfBirth', e.target.value); }} required />
           <Input label="Address" value={data.address} onChange={e => handleChangeUpper('address', e.target.value)} required />
         </div>
