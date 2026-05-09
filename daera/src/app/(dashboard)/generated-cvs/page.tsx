@@ -18,6 +18,7 @@ import MATemplate from '@/components/cv/templates/MATemplate';
 import RATemplate from '@/components/cv/templates/RATemplate';
 import AlShablanTemplate from '@/components/cv/templates/AlShablanTemplate';
 import UssusTemplate from '@/components/cv/templates/UssusTemplate';
+import { clearCandidatesCache } from '@/hooks/useCandidates';
 
 const TEMPLATES = [
   { id: 'ussus', name: 'USSUS Layout', category: 'Minimal', color: 'bg-cyan-500', textColor: 'text-cyan-600', bgLight: 'bg-cyan-50', component: UssusTemplate },
@@ -448,6 +449,9 @@ export default function GeneratedCVsPage() {
         body: JSON.stringify({ isFlagged: !currentFlagStatus }),
       });
       if (!res.ok) throw new Error('Failed');
+      
+      // Clear global candidates cache so the Candidates page will refetch
+      clearCandidatesCache();
       
       // Update local state by finding all CVs with this candidateId and toggling them
       setCvs(prev => prev.map(c => 

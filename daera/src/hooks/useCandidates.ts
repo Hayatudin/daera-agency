@@ -7,6 +7,12 @@ let fetchPromise: Promise<Candidate[]> | null = null;
 let lastFetchTime = 0;
 const CACHE_TTL = 30000; // 30 seconds
 
+export function clearCandidatesCache() {
+  cachedCandidates = null;
+  fetchPromise = null;
+  lastFetchTime = 0;
+}
+
 export function useCandidates(initialForceRefresh = false) {
   const [candidates, setCandidates] = useState<Candidate[]>(cachedCandidates || []);
   const [isLoading, setIsLoading] = useState(!cachedCandidates);

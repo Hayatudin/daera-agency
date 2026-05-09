@@ -70,6 +70,7 @@ export async function GET() {
       labourIdUrl: c.labourIdUrl || '',
       isRequested: c.isRequested || false,
       visaOrContractNumber: c.visaOrContractNumber || null,
+      isFlagged: c.isFlagged || false,
       registeredAt: c.registeredAt.toISOString(),
       status: c.status,
       generatedCVs: c.generatedCVs?.map(cv => cv.templateId) || [],
