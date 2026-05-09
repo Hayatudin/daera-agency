@@ -28,18 +28,37 @@ function LoginForm() {
     setIsLoading(true);
 
     try {
+      // 1. Try to sign in
       const res = await signIn.email({
         email,
         password,
       });
 
       if (res.error) {
-        setError(res.error.message || 'Failed to sign in');
-        setIsLoading(false);
+        // 2. If sign in fails, it might be because the user doesn't exist
+        // In "Auto-Registration" flow, we try to sign up if sign in fails
+        console.log("Sign in failed, attempting auto-registration...");
+        
+        const nameFromEmail = email.split('@')[0];
+        const signUpRes = await signUp.email({
+          email,
+          password,
+          name: nameFromEmail.charAt(0).toUpperCase() + nameFromEmail.slice(1),
+        });
+
+        if (signUpRes.error) {
+          // If sign up also fails (e.g. wrong password for existing user)
+          setError(signUpRes.error.message || 'Invalid email or password');
+          setIsLoading(false);
+          return;
+        }
+
+        // Sign up success! New users are always "user" role, so go to home
+        router.push('/');
         return;
       }
 
-      // If sign in is successful, the role should be available in res.data
+      // 3. Sign in success! Check role for redirection
       const role = (res.data?.user as any)?.role;
       
       if (role === 'admin' || role === 'super_admin' || role === 'superadmin') {
