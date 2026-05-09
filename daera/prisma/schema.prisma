@@ -68,6 +68,7 @@ model Candidate {
   labourIdUrl              String?
   isRequested              Boolean   @default(false)
   visaOrContractNumber     String?
+  isFlagged                Boolean   @default(false)
   registeredAt             DateTime  @default(now())
   status                   String    @default("pending")
 

@@ -70,6 +70,7 @@ export interface Candidate {
   labourIdUrl?: string;
   isRequested?: boolean;
   visaOrContractNumber?: string | null;
+  isFlagged?: boolean;
   registeredAt: string;
   status: 'pending' | 'approved' | 'rejected';
   cvDeadline?: string;

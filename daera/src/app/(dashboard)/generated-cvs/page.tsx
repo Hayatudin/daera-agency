@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import {
   FolderOpen, FileText, ChevronRight, ArrowLeft, Download,
   RefreshCw, Trash2, MoreVertical, LayoutTemplate, X, Check, AlertTriangle,
-  FileDown, Image as ImageIcon, ChevronDown, PackageOpen
+  FileDown, Image as ImageIcon, ChevronDown, PackageOpen, Flag
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Button from '@/components/ui/Button';
@@ -34,11 +34,15 @@ function ActionMenu({
   currentTemplateId,
   onDelete,
   onChangeTemplate,
+  isFlagged,
+  onToggleFlag,
 }: {
   cvId: string;
   currentTemplateId: string;
   onDelete: () => void;
   onChangeTemplate: () => void;
+  isFlagged: boolean;
+  onToggleFlag: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
@@ -70,6 +74,12 @@ function ActionMenu({
         className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-text-primary hover:bg-surface transition-colors"
       >
         <LayoutTemplate size={14} className="text-primary" /> Change Template
+      </button>
+      <button onClick={() => { setOpen(false); onToggleFlag(); }}
+        className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-text-primary hover:bg-red-50 transition-colors"
+      >
+        <Flag size={14} className={isFlagged ? "text-red-500 fill-red-500" : "text-text-tertiary"} /> 
+        {isFlagged ? 'Unflag Candidate' : 'Flag Candidate'}
       </button>
       <div className="border-t border-border" />
       <button onClick={() => { setOpen(false); onDelete(); }}
@@ -308,6 +318,7 @@ export default function GeneratedCVsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
   const [religionFilter, setReligionFilter] = useState<string>('');
+  const [flagFilter, setFlagFilter] = useState<'all' | 'flagged' | 'unflagged'>('all');
   const [downloadAllOpen, setDownloadAllOpen] = useState(false);
   const [isDownloadingAll, setIsDownloadingAll] = useState(false);
 
@@ -425,6 +436,28 @@ export default function GeneratedCVsPage() {
       showToast('Failed to change template', 'error');
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  // ── Toggle Flag ────────────────────────────────────────────────────────────
+  const toggleFlag = async (cvId: string, candidateId: string, currentFlagStatus: boolean) => {
+    try {
+      const res = await fetch(`/api/candidates/${candidateId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isFlagged: !currentFlagStatus }),
+      });
+      if (!res.ok) throw new Error('Failed');
+      
+      // Update local state by finding all CVs with this candidateId and toggling them
+      setCvs(prev => prev.map(c => 
+        c.candidateId === candidateId 
+          ? { ...c, candidate: { ...c.candidate, isFlagged: !currentFlagStatus } } 
+          : c
+      ));
+      showToast(currentFlagStatus ? 'Candidate Unflagged' : 'Candidate Flagged');
+    } catch {
+      showToast('Failed to update flag status', 'error');
     }
   };
 
@@ -585,10 +618,13 @@ export default function GeneratedCVsPage() {
   const activeTemplate = TEMPLATES.find(t => t.id === selectedFolder)!;
   const allFolderCVs = cvs.filter(c => c.templateId === selectedFolder);
   const activeCVs = allFolderCVs.filter(cv => {
-    if (!religionFilter) return true;
-    const rel = (cv.candidate.religion || '').toLowerCase();
-    if (religionFilter === 'muslim') return rel === 'muslim';
-    if (religionFilter === 'non-muslim') return rel !== 'muslim' && rel !== '';
+    if (religionFilter) {
+      const rel = (cv.candidate.religion || '').toLowerCase();
+      if (religionFilter === 'muslim' && rel !== 'muslim') return false;
+      if (religionFilter === 'non-muslim' && (rel === 'muslim' || rel === '')) return false;
+    }
+    if (flagFilter === 'flagged' && !cv.candidate.isFlagged) return false;
+    if (flagFilter === 'unflagged' && cv.candidate.isFlagged) return false;
     return true;
   });
   const TC = activeTemplate.component;
@@ -703,12 +739,12 @@ export default function GeneratedCVsPage() {
         {/* Breadcrumb + Actions */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={() => { setSelectedFolder(null); setReligionFilter(''); }} className="p-2 rounded-lg hover:bg-surface border border-border transition-colors text-text-secondary hover:text-text-primary">
+            <button onClick={() => { setSelectedFolder(null); setReligionFilter(''); setFlagFilter('all'); }} className="p-2 rounded-lg hover:bg-surface border border-border transition-colors text-text-secondary hover:text-text-primary">
               <ArrowLeft size={18} />
             </button>
             <div>
               <div className="flex items-center gap-1.5 text-xs text-text-tertiary mb-0.5">
-                <span className="hover:text-primary cursor-pointer" onClick={() => { setSelectedFolder(null); setReligionFilter(''); }}>Folders</span>
+                <span className="hover:text-primary cursor-pointer" onClick={() => { setSelectedFolder(null); setReligionFilter(''); setFlagFilter('all'); }}>Folders</span>
                 <ChevronRight size={12} />
                 <span className="text-text-primary font-medium">{activeTemplate.name}</span>
               </div>
@@ -724,7 +760,7 @@ export default function GeneratedCVsPage() {
           {/* Right side: Religion filter + Download All */}
           <div className="flex items-center gap-3">
             {/* Religion Filter */}
-            <div className="w-44">
+            <div className="w-36">
               <select
                 value={religionFilter}
                 onChange={e => setReligionFilter(e.target.value)}
@@ -733,6 +769,19 @@ export default function GeneratedCVsPage() {
                 <option value="">All Religions</option>
                 <option value="muslim">Muslim</option>
                 <option value="non-muslim">Non-Muslim</option>
+              </select>
+            </div>
+
+            {/* Flag Filter */}
+            <div className="w-36">
+              <select
+                value={flagFilter}
+                onChange={e => setFlagFilter(e.target.value as any)}
+                className="w-full px-3 py-2 rounded-xl border border-border bg-surface text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer"
+              >
+                <option value="all">All Status</option>
+                <option value="flagged">Flagged Only</option>
+                <option value="unflagged">Unflagged Only</option>
               </select>
             </div>
 
@@ -830,8 +879,9 @@ export default function GeneratedCVsPage() {
                           : cv.candidate.givenNames.charAt(0)}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-text-primary truncate">
+                        <p className="text-sm font-semibold text-text-primary truncate flex items-center gap-1.5">
                           {cv.candidate.givenNames} {cv.candidate.surname}
+                          {cv.candidate.isFlagged && <Flag size={14} className="text-red-500 fill-red-500 shrink-0" />}
                         </p>
                         <p className="text-xs text-text-tertiary">{cv.candidate.passportNumber}</p>
                       </div>
@@ -842,6 +892,8 @@ export default function GeneratedCVsPage() {
                       currentTemplateId={cv.templateId}
                       onDelete={() => setDeleteTarget(cv)}
                       onChangeTemplate={() => setChangeTarget(cv)}
+                      isFlagged={cv.candidate.isFlagged || false}
+                      onToggleFlag={() => toggleFlag(cv.id, cv.candidateId, cv.candidate.isFlagged || false)}
                     />
                   </div>
 

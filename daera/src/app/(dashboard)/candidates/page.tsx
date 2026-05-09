@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Filter, Users, MoreVertical, Loader2, CheckCircle, Trash2, Edit3, Eye } from 'lucide-react';
+import { Users, UserPlus, FileText, CheckCircle, Clock, Search, MoreVertical, Edit3, Trash2, ShieldAlert, Eye, Loader2, Link as LinkIcon, Flag, Filter } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
 import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
@@ -85,6 +85,26 @@ export default function CandidatesPage() {
     } catch (err: any) { 
       console.error(err);
       alert(err.message || 'Failed to update medical status'); 
+    }
+  };
+
+  // Toggle Flag Status
+  const toggleFlag = async (id: string, current: boolean) => {
+    setOpenMenuId(null);
+    try {
+      const res = await fetch(`/api/candidates/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isFlagged: !current }),
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to update flag status');
+      }
+      setCandidates(prev => prev.map(c => c.id === id ? { ...c, isFlagged: !current } : c));
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || 'Failed to update flag status');
     }
   };
 
@@ -256,7 +276,10 @@ export default function CandidatesPage() {
                           <span className="text-primary font-bold text-sm">{candidate.passportData.givenNames.charAt(0)}{candidate.passportData.surname.charAt(0)}</span>
                         </div>
                         <div>
-                          <p className="font-semibold text-text-primary">{candidate.passportData.givenNames} {candidate.passportData.surname}</p>
+                          <p className="font-semibold text-text-primary flex items-center gap-2">
+                            {candidate.passportData.givenNames} {candidate.passportData.surname}
+                            {candidate.isFlagged && <Flag size={14} className="text-red-500 fill-red-500" />}
+                          </p>
                           <p className="text-xs text-text-tertiary">{candidate.personalInfo.email}</p>
                         </div>
                       </div>
@@ -346,6 +369,12 @@ export default function CandidatesPage() {
                             <button onClick={() => { setOpenMenuId(null); router.push(`/registration?edit=${candidate.id}`); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
                               <Edit3 size={16} className="text-text-tertiary" />
                               <span>Edit</span>
+                            </button>
+                            <button onClick={(e) => { e.stopPropagation(); toggleFlag(candidate.id, candidate.isFlagged || false); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-red-50 transition-colors text-left">
+                              <Flag size={16} className={candidate.isFlagged ? "text-red-500 fill-red-500" : "text-text-tertiary"} />
+                              <span className={candidate.isFlagged ? "text-red-600 font-medium" : "text-text-primary"}>
+                                {candidate.isFlagged ? 'Unflag Candidate' : 'Flag Candidate'}
+                              </span>
                             </button>
                             <div className="border-t border-border my-1" />
                             <button onClick={() => deleteCandidate(candidate.id)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-red-50 transition-colors text-left text-red-600">
