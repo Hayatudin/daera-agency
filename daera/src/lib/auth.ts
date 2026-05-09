@@ -32,6 +32,7 @@ export const auth = betterAuth({
     'https://coolstaffagency.com',
     'http://www.coolstaffagency.com',
     'https://www.coolstaffagency.com',
+    'https://coolstaffagency.vercel.app',
   ],
 
   // Map the 'role' field from the database to the session user object
