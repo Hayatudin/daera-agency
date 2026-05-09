@@ -137,9 +137,17 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
       <div className="px-3 pb-6 space-y-1 border-t border-white/10 pt-3 mt-2">
         {/* User info */}
         {!isCollapsed && session?.user && (
-          <div className="px-4 py-2 mb-1">
-            <p className="text-white/80 text-xs font-semibold truncate">{session.user.name}</p>
-            <p className="text-white/30 text-[10px] truncate">{session.user.email}</p>
+          <div className="px-4 py-3 mb-2 bg-white/5 rounded-xl border border-white/5 mx-1">
+            <div className="flex items-center gap-2 mb-1">
+              <p className="text-white/90 text-sm font-bold truncate leading-none">{session.user.name}</p>
+              <span className={cn(
+                "text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-tighter",
+                role.includes('admin') ? "bg-amber-500/20 text-amber-500 border border-amber-500/30" : "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
+              )}>
+                {role.replace('_', ' ')}
+              </span>
+            </div>
+            <p className="text-white/30 text-[10px] truncate font-medium">{session.user.email}</p>
           </div>
         )}
 

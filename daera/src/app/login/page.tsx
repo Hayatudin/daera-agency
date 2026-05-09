@@ -28,50 +28,63 @@ function LoginForm() {
     setIsLoading(true);
 
     try {
-      // 1. Try to sign in
-      const res = await signIn.email({
+      // 1. Attempt Sign In
+      const { data: signInData, error: signInError } = await signIn.email({
         email,
         password,
       });
 
-      if (res.error) {
-        // 2. If sign in fails, it might be because the user doesn't exist
-        // In "Auto-Registration" flow, we try to sign up if sign in fails
-        console.log("Sign in failed, attempting auto-registration...");
+      if (!signInError) {
+        // Sign in success! Check role for redirection
+        const user = signInData.user as any;
+        const role = user?.role;
+        console.log("Sign in successful. User role:", role);
         
-        const nameFromEmail = email.split('@')[0];
-        const signUpRes = await signUp.email({
-          email,
-          password,
-          name: nameFromEmail.charAt(0).toUpperCase() + nameFromEmail.slice(1),
-        });
-
-        if (signUpRes.error) {
-          // If sign up also fails (e.g. wrong password for existing user)
-          setError(signUpRes.error.message || 'Invalid email or password');
-          setIsLoading(false);
-          return;
+        if (role === 'admin' || role === 'super_admin' || role === 'superadmin') {
+          router.push(callbackUrl);
+        } else {
+          router.push('/');
         }
+        return;
+      }
 
+      // 2. If Sign In failed, attempt Sign Up (Seamless Flow)
+      // Note: We only try Sign Up if Sign In failed.
+      // Better Auth by default returns "Invalid email or password" for security.
+      console.log("Sign in failed with:", signInError.message, ". Attempting auto-registration...");
+
+      const namePrefix = email.split('@')[0];
+      const displayName = namePrefix.charAt(0).toUpperCase() + namePrefix.slice(1);
+
+      const { data: signUpData, error: signUpError } = await signUp.email({
+        email,
+        password,
+        name: displayName,
+      });
+
+      if (!signUpError) {
         // Sign up success! New users are always "user" role, so go to home
+        console.log("Auto-registration successful for new user.");
         router.push('/');
         return;
       }
 
-      // 3. Sign in success! Check role for redirection
-      const role = (res.data?.user as any)?.role;
-      
-      if (role === 'admin' || role === 'super_admin' || role === 'superadmin') {
-        router.push(callbackUrl);
+      // 3. If both failed
+      // If signUpError is "User already exists", then the real error is the password from signIn
+      if (signUpError.message?.toLowerCase().includes('already exists') || signUpError.code === 'USER_ALREADY_EXISTS') {
+        setError('Invalid email or password');
       } else {
-        router.push('/');
+        setError(signUpError.message || signInError.message || 'Authentication failed');
       }
+      
     } catch (err: any) {
+      console.error("Critical Auth Error:", err);
       if (err.message === 'Failed to fetch') {
         setError('Network error: Could not reach the server. Please check your internet or server connection.');
       } else {
-        setError(err.message || 'An error occurred during sign in');
+        setError(err.message || 'An error occurred during authentication');
       }
+    } finally {
       setIsLoading(false);
     }
   };
