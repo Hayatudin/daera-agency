@@ -55,9 +55,15 @@ export default function CandidatesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bodyPayload),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to update status');
+      }
       setCandidates(prev => prev.map(c => c.id === id ? { ...c, isRequested: !current, visaOrContractNumber: bodyPayload.visaOrContractNumber } : c));
-    } catch { alert('Failed to update status'); }
+    } catch (err: any) { 
+      console.error(err);
+      alert(err.message || 'Failed to update status'); 
+    }
   };
 
   // Update Medical Status
@@ -68,12 +74,18 @@ export default function CandidatesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ medicalStatus: newStatus }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to update medical status');
+      }
       setCandidates(prev => prev.map(c => c.id === id ? {
         ...c,
         personalInfo: { ...c.personalInfo, medicalStatus: newStatus as any }
       } : c));
-    } catch { alert('Failed to update medical status'); }
+    } catch (err: any) { 
+      console.error(err);
+      alert(err.message || 'Failed to update medical status'); 
+    }
   };
 
   // Delete candidate
@@ -293,10 +305,11 @@ export default function CandidatesPage() {
                           onClick={(e) => e.stopPropagation()}
                           onChange={(e) => updateMedicalStatus(candidate.id, e.target.value)}
                           className={cn(
-                            "text-xs font-bold px-3 py-1.5 rounded-lg border appearance-none outline-none cursor-pointer shadow-sm transition-all",
-                            candidate.personalInfo.medicalStatus === 'Fit' ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 focus:ring-2 focus:ring-emerald-500/20" :
-                            candidate.personalInfo.medicalStatus === 'Unfit' ? "bg-red-50 text-red-700 border-red-200 hover:bg-red-100 focus:ring-2 focus:ring-red-500/20" :
-                            "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 focus:ring-2 focus:ring-amber-500/20"
+                            "text-xs font-semibold px-3 py-1.5 rounded-full border appearance-none outline-none cursor-pointer shadow-sm transition-all text-center min-w-[80px]",
+                            "bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2210%22%20height%3D%2210%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23999%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-[length:10px] bg-[right_8px_center] bg-no-repeat pr-7 bg-white",
+                            candidate.personalInfo.medicalStatus === 'Fit' ? "text-[#34C759] border-[#34C759]/30 bg-emerald-50/30" :
+                            candidate.personalInfo.medicalStatus === 'Unfit' ? "text-[#FF3B30] border-[#FF3B30]/30 bg-red-50/30" :
+                            "text-[#8E8E93] border-gray-200"
                           )}
                         >
                           <option value="Pending">Pending</option>

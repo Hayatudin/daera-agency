@@ -191,7 +191,7 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
 
-    // If marking as Unfit, also move CV to backup (isRequested = true)
+    // If marking as Unfit, also mark as requested so it acts as backup
     if (body.medicalStatus === 'Unfit') {
       body.isRequested = true;
     }
@@ -202,6 +202,15 @@ export async function PATCH(
       if (current?.medicalStatus === 'Unfit') {
         body.medicalStatus = 'Pending';
       }
+    }
+
+    // "When visa is selected it should remove that person's CV from those template folders. 
+    // Also when it is marked as 'unfit' (the medical status is unfit), it should remove that CV."
+    if (body.isRequested === true || body.medicalStatus === 'Unfit') {
+      // Delete from GeneratedCV table
+      await prisma.generatedCV.deleteMany({
+        where: { candidateId: id }
+      });
     }
 
     const updated = await prisma.candidate.update({
