@@ -76,10 +76,15 @@ export default function DashboardPage() {
           <p className="text-text-secondary text-sm sm:text-base mt-1">Overview of candidate registrations and quick actions</p>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-          <Link href="/registration">
+          <Link href="/registration" className="hidden sm:block">
             <Button variant="primary" icon={<UserPlus size={16} />}>ADD CANDIDATE</Button>
           </Link>
-          <a href={MUSANED_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-[#2a9d8f] to-[#238b80] hover:from-[#238b80] hover:to-[#1d7a71] text-white rounded-xl font-semibold text-xs sm:text-sm shadow-lg shadow-[#2a9d8f]/25 transition-all duration-200 hover:shadow-xl hover:shadow-[#2a9d8f]/30 hover:-translate-y-0.5">
+          <Link href="/quick-registration" className="sm:hidden w-full">
+            <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-orange-500/30 transition-all active:scale-[0.98]">
+              <ClipboardList size={18} /> QUICK REGISTER
+            </button>
+          </Link>
+          <a href={MUSANED_URL} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-[#2a9d8f] to-[#238b80] hover:from-[#238b80] hover:to-[#1d7a71] text-white rounded-xl font-semibold text-xs sm:text-sm shadow-lg shadow-[#2a9d8f]/25 transition-all duration-200 hover:shadow-xl hover:shadow-[#2a9d8f]/30 hover:-translate-y-0.5 flex-1 sm:flex-none">
             <ExternalLink size={16} /> <span className="hidden sm:inline">Go to</span> Musaned
           </a>
         </div>

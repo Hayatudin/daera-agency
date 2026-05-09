@@ -62,7 +62,6 @@ export default function PassportUploader({
         type="file"
         ref={fileInputRef}
         accept="image/png,image/jpeg,image/jpg"
-        capture="environment"
         onChange={handleFileInput}
         className="hidden"
       />
