@@ -139,7 +139,14 @@ export default function QuickRegistrationPreviewPage({ params }: { params: Promi
         </div>
         <div className="p-3 sm:p-4 space-y-2">
           <CopyField label="Education Level" value={data.educationLevel || ''} icon={<GraduationCap size={16} />} />
-          <CopyField label="Job / Experience" value={data.jobExperience || ''} icon={<Briefcase size={16} />} />
+          {(() => {
+            let parsedExperiences: any[] = [];
+            try { parsedExperiences = JSON.parse(data.jobExperience || '[]'); } catch { /* ignore */ }
+            const expString = Array.isArray(parsedExperiences) && parsedExperiences.length > 0 
+              ? parsedExperiences.map(e => e.experienceStatus === 'New' ? 'New' : `${e.country} (${e.yearsOfExperience} Years)`).join(', ')
+              : data.jobExperience || '';
+            return <CopyField label="Job / Experience" value={expString} icon={<Briefcase size={16} />} />;
+          })()}
           <CopyField label="Marital Status" value={data.maritalStatus || ''} icon={<Heart size={16} />} />
           {data.numberOfChildren > 0 && (
             <CopyField label="Number of Children" value={String(data.numberOfChildren)} icon={<Baby size={16} />} />

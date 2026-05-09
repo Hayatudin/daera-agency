@@ -4,8 +4,11 @@ import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import PassportUploader from '@/components/registration/PassportUploader';
 import PassportDataFields from '@/components/registration/PassportDataFields';
-import { PassportData } from '@/types';
-import { Save, Loader2 } from 'lucide-react';
+import { PassportData, WorkExperienceEntry } from '@/types';
+import { Save, Loader2, Trash2, Plus } from 'lucide-react';
+import { allCountries } from '@/data/countries';
+import Select from '@/components/ui/Select';
+import Input from '@/components/ui/Input';
 
 const emptyPassportData: PassportData = {
   passportNumber: '', surname: '', givenNames: '', dateOfBirth: '',
@@ -26,7 +29,7 @@ export default function QuickRegistrationPage() {
 
   // Extra fields
   const [educationLevel, setEducationLevel] = useState('');
-  const [jobExperience, setJobExperience] = useState('');
+  const [workExperience, setWorkExperience] = useState<WorkExperienceEntry[]>([{ experienceStatus: 'New', country: '', yearsOfExperience: '' }]);
   const [maritalStatus, setMaritalStatus] = useState('');
   const [numberOfChildren, setNumberOfChildren] = useState(0);
 
@@ -70,6 +73,23 @@ export default function QuickRegistrationPage() {
     setPassportData(prev => ({ ...prev, [field]: value }));
   };
 
+  const updateExperience = (index: number, field: keyof WorkExperienceEntry, value: string) => {
+    const updated = [...workExperience];
+    updated[index] = { ...updated[index], [field]: field === 'country' ? value.toUpperCase() : value };
+    setWorkExperience(updated);
+  };
+
+  const removeExperience = (index: number) => {
+    const updated = [...workExperience];
+    updated.splice(index, 1);
+    setWorkExperience(updated);
+  };
+
+  const addExperience = () => {
+    const newExp: WorkExperienceEntry = { experienceStatus: 'Have experience', country: '', yearsOfExperience: '' };
+    setWorkExperience([...workExperience, newExp]);
+  };
+
   const handleSave = async () => {
     if (!passportData.passportNumber && !passportData.surname) {
       setError('Please scan a passport or fill in at least the Passport Number and Surname.');
@@ -95,7 +115,7 @@ export default function QuickRegistrationPage() {
           issuingCountry: passportData.issuingCountry,
           placeOfBirth: passportData.placeOfBirth,
           educationLevel,
-          jobExperience,
+          jobExperience: JSON.stringify(workExperience),
           maritalStatus,
           numberOfChildren,
           passportImageUrl: passportImage,
@@ -182,15 +202,65 @@ export default function QuickRegistrationPage() {
             </div>
 
             {/* Job Experience */}
-            <div>
-              <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider mb-1.5">Job / Experience</label>
-              <input
-                type="text"
-                value={jobExperience}
-                onChange={e => setJobExperience(e.target.value.toUpperCase())}
-                placeholder="e.g. HOUSEMAID 2 YEARS"
-                className="w-full px-4 py-2.5 text-sm rounded-xl border border-border bg-white text-text-primary placeholder:text-text-tertiary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50"
-              />
+            <div className="sm:col-span-2 space-y-4 pt-4 border-t border-border mt-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-semibold text-text-secondary uppercase tracking-wider">Job / Experience</label>
+              </div>
+              
+              <div className="space-y-4">
+                {workExperience.map((exp, index) => (
+                  <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 relative p-4 bg-gray-50/50 rounded-xl border border-border/50">
+                    <Select
+                      label="Experience"
+                      required
+                      options={[{ value: 'Have experience', label: 'Have experience' }, { value: 'New', label: 'New' }]}
+                      value={exp.experienceStatus}
+                      onChange={v => updateExperience(index, 'experienceStatus', v)}
+                    />
+
+                    {exp.experienceStatus === 'Have experience' && (
+                      <>
+                        <Select
+                          label="Country"
+                          required
+                          options={allCountries.map(c => ({ value: c.toUpperCase(), label: c.toUpperCase() }))}
+                          value={exp.country}
+                          onChange={v => updateExperience(index, 'country', v)}
+                          placeholder="Select country"
+                        />
+                        <div className="relative">
+                          <Input
+                            label="Years Of Experience"
+                            type="number"
+                            required
+                            value={exp.yearsOfExperience}
+                            onChange={e => updateExperience(index, 'yearsOfExperience', e.target.value)}
+                          />
+                          {workExperience.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeExperience(index)}
+                              className="absolute right-0 -top-8 text-danger hover:bg-danger/10 p-1.5 rounded-md transition-colors"
+                              title="Remove Experience"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+                <div className="flex justify-start">
+                   <button
+                     type="button"
+                     onClick={addExperience}
+                     className="text-sm text-primary font-semibold flex items-center gap-1.5 hover:underline"
+                   >
+                     <Plus size={16} /> Add Another Experience
+                   </button>
+                </div>
+              </div>
             </div>
 
             {/* Marital Status */}
