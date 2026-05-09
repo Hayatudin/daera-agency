@@ -62,6 +62,7 @@ export default function PassportUploader({
         type="file"
         ref={fileInputRef}
         accept="image/png,image/jpeg,image/jpg"
+        capture="environment"
         onChange={handleFileInput}
         className="hidden"
       />
@@ -153,10 +154,10 @@ export default function PassportUploader({
 
           <div className="text-center">
             <p className="text-base font-semibold text-text-primary mb-1">
-              Upload Passport Image
+              Upload Passport Image or Take Photo
             </p>
             <p className="text-sm text-text-tertiary">
-              Drag & drop a passport scan here, or <span className="text-primary font-medium">browse files</span>
+              Use camera, drag & drop, or <span className="text-primary font-medium">browse files</span>
             </p>
             <p className="text-xs text-text-tertiary mt-2">
               Supports JPG, PNG • Max 5MB

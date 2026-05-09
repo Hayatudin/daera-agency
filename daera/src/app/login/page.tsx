@@ -24,10 +24,33 @@ function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Temporary bypass — redirect immediately to dashboard
+    setError('');
     setIsLoading(true);
-    router.push(callbackUrl);
+
+    try {
+      const res = await signIn.email({
+        email,
+        password,
+      });
+
+      if (res.error) {
+        setError(res.error.message || 'Failed to sign in');
+        setIsLoading(false);
+        return;
+      }
+
+      // If sign in is successful, the role should be available in res.data
+      const role = (res.data?.user as any)?.role;
+      
+      if (role === 'admin' || role === 'super_admin' || role === 'superadmin') {
+        router.push(callbackUrl);
+      } else {
+        router.push('/');
+      }
+    } catch (err: any) {
+      setError(err.message || 'An error occurred during sign in');
+      setIsLoading(false);
+    }
   };
 
   return (
