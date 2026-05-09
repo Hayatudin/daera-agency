@@ -14,6 +14,8 @@ import Input from '@/components/ui/Input';
 import Select from '@/components/ui/Select';
 import Button from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
+import { useSession, authClient } from '@/lib/auth-client';
+import { useEffect } from 'react';
 
 // Helper component for Toggle Switch
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
@@ -40,17 +42,79 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
 }
 
 export default function SettingsPage() {
+  const { data: session, isPending } = useSession();
   const [activeTab, setActiveTab] = useState<'profile' | 'agency' | 'notifications' | 'preferences'>('profile');
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Form states (mocked for UI)
-  const [profile, setProfile] = useState({ name: 'Admin User', email: 'admin@daera.com', role: 'System Administrator' });
+  // Form states
+  const [profile, setProfile] = useState({ name: '', email: '', role: '' });
+  const [passwordForm, setPasswordForm] = useState({ current: '', new: '', confirm: '' });
   const [notifications, setNotifications] = useState({ cvDeadlines: true, newRegistrations: true, systemUpdates: false });
   const [preferences, setPreferences] = useState({ language: 'en', timezone: 'Asia/Riyadh', dateFormat: 'YYYY-MM-DD' });
 
-  const handleSave = () => {
-    setToast('Settings saved successfully!');
+  // Load profile from session
+  useEffect(() => {
+    if (session?.user) {
+      setProfile({
+        name: session.user.name || '',
+        email: session.user.email || '',
+        role: (session.user as any).role || 'user'
+      });
+    }
+  }, [session]);
+
+  const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
+    setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleSaveProfile = async () => {
+    setIsSaving(true);
+    try {
+      const res = await fetch('/api/account/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: profile.name }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update profile');
+      showToast('Profile updated successfully');
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!passwordForm.current || !passwordForm.new || !passwordForm.confirm) {
+      showToast('Please fill all password fields', 'error');
+      return;
+    }
+    if (passwordForm.new !== passwordForm.confirm) {
+      showToast('Passwords do not match', 'error');
+      return;
+    }
+    setIsSaving(true);
+    try {
+      const res = await fetch('/api/account/password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          currentPassword: passwordForm.current, 
+          newPassword: passwordForm.new 
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update password');
+      showToast('Password changed successfully');
+      setPasswordForm({ current: '', new: '', confirm: '' });
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const tabs = [
@@ -72,8 +136,12 @@ export default function SettingsPage() {
           </h1>
           <p className="text-text-secondary mt-1 ml-12">Manage your account and agency preferences</p>
         </div>
-        <Button onClick={handleSave} icon={<Save size={16} />}>
-          Save Changes
+        <Button 
+          onClick={activeTab === 'profile' ? handleSaveProfile : () => showToast('Settings saved')} 
+          disabled={isSaving || isPending}
+          icon={isSaving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={16} />}
+        >
+          {isSaving ? 'Saving...' : 'Save Changes'}
         </Button>
       </div>
 
@@ -123,12 +191,36 @@ export default function SettingsPage() {
                 </h2>
                 <p className="text-sm text-text-secondary mb-6">Update your password to keep your account secure.</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                  <Input label="Current Password" type="password" placeholder="••••••••" />
+                  <Input 
+                    label="Current Password" 
+                    type="password" 
+                    placeholder="••••••••" 
+                    value={passwordForm.current}
+                    onChange={(e) => setPasswordForm({...passwordForm, current: e.target.value})}
+                  />
                   <div className="hidden md:block"></div> {/* Spacer */}
-                  <Input label="New Password" type="password" placeholder="••••••••" />
-                  <Input label="Confirm New Password" type="password" placeholder="••••••••" />
+                  <Input 
+                    label="New Password" 
+                    type="password" 
+                    placeholder="••••••••" 
+                    value={passwordForm.new}
+                    onChange={(e) => setPasswordForm({...passwordForm, new: e.target.value})}
+                  />
+                  <Input 
+                    label="Confirm New Password" 
+                    type="password" 
+                    placeholder="••••••••" 
+                    value={passwordForm.confirm}
+                    onChange={(e) => setPasswordForm({...passwordForm, confirm: e.target.value})}
+                  />
                 </div>
-                <Button variant="outline">Update Password</Button>
+                <Button 
+                  variant="outline" 
+                  onClick={handleUpdatePassword}
+                  disabled={isSaving}
+                >
+                  {isSaving ? 'Updating...' : 'Update Password'}
+                </Button>
               </div>
             </div>
           )}
@@ -216,9 +308,12 @@ export default function SettingsPage() {
       {/* Toast notification */}
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 animate-toast">
-          <div className="flex items-center gap-3 bg-gray-900 text-white px-5 py-3 rounded-xl shadow-2xl">
-            <CheckCircle2 size={18} className="text-success" />
-            <span className="text-sm font-medium">{toast}</span>
+          <div className={cn(
+            "flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl",
+            toast.type === 'success' ? "bg-gray-900 text-white" : "bg-red-600 text-white"
+          )}>
+            {toast.type === 'success' ? <CheckCircle2 size={18} className="text-success" /> : <Lock size={18} />}
+            <span className="text-sm font-medium">{toast.msg}</span>
           </div>
         </div>
       )}
