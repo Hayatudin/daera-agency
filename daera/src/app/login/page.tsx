@@ -48,7 +48,11 @@ function LoginForm() {
         router.push('/');
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred during sign in');
+      if (err.message === 'Failed to fetch') {
+        setError('Network error: Could not reach the server. Please check your internet or server connection.');
+      } else {
+        setError(err.message || 'An error occurred during sign in');
+      }
       setIsLoading(false);
     }
   };

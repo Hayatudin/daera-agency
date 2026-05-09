@@ -26,8 +26,12 @@ export const auth = betterAuth({
 
   // Trust the configured origin
   trustedOrigins: [
-    process.env.BETTER_AUTH_URL   ?? 'http://localhost:3000',
+    process.env.BETTER_AUTH_URL ?? 'http://localhost:3000',
     process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? 'http://localhost:3000',
+    'http://coolstaffagency.com',
+    'https://coolstaffagency.com',
+    'http://www.coolstaffagency.com',
+    'https://www.coolstaffagency.com',
   ],
 
   // Map the 'role' field from the database to the session user object
