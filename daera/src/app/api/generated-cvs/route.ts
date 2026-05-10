@@ -39,16 +39,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Candidate not found' }, { status: 404 });
     }
 
-    // Check if the candidate already has a CV in the target template
+    // Check if the candidate already has a CV in ANY template
     const duplicateCV = await prisma.generatedCV.findFirst({
       where: {
-        candidateId: candidateId,
-        templateId: templateId
+        candidateId: candidateId
       }
     });
 
     if (duplicateCV) {
-      return NextResponse.json({ error: 'Candidate already generated in that template' }, { status: 409 });
+      return NextResponse.json({ 
+        error: 'Candidate already generated', 
+        templateId: duplicateCV.templateId 
+      }, { status: 409 });
     }
     
     // Upload photos locally if they are base64

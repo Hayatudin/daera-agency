@@ -38,6 +38,32 @@ function CVGeneratorContent() {
   const [toast, setToast] = useState<string | null>(null);
   const [isDownloadOpen, setIsDownloadOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [generatedCvs, setGeneratedCvs] = useState<any[]>([]);
+  const [alreadyGeneratedTemplate, setAlreadyGeneratedTemplate] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    fetch('/api/generated-cvs')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setGeneratedCvs(data);
+      })
+      .catch(console.error);
+  }, []);
+
+  React.useEffect(() => {
+    if (selectedCandidateId && generatedCvs.length > 0) {
+      const existingCv = generatedCvs.find(cv => cv.candidateId === selectedCandidateId);
+      if (existingCv) {
+        const templateName = TEMPLATES.find(t => t.id === existingCv.templateId)?.name || existingCv.templateId;
+        setAlreadyGeneratedTemplate(templateName);
+        setToast(`This candidate already has a CV generated in the ${templateName} template.`);
+      } else {
+        setAlreadyGeneratedTemplate(null);
+      }
+    } else {
+      setAlreadyGeneratedTemplate(null);
+    }
+  }, [selectedCandidateId, generatedCvs]);
 
   // Ref for the CV container to print or capture
   const cvRef = useRef<HTMLDivElement>(null);
@@ -58,6 +84,10 @@ function CVGeneratorContent() {
 
   const handleDownload = async (format: 'pdf' | 'jpg' | 'doc') => {
     if (!cvRef.current || !selectedCandidate) return;
+    if (alreadyGeneratedTemplate) {
+      setToast(`Cannot generate: CV already exists in ${alreadyGeneratedTemplate}`);
+      return;
+    }
 
     setIsDownloading(true);
     setIsDownloadOpen(false);
@@ -167,7 +197,10 @@ function CVGeneratorContent() {
         });
 
         if (saveRes.status === 409) {
-          setToast('Candidate already generated in that template');
+          const errData = await saveRes.json().catch(() => ({}));
+          const existingTemplateId = errData.templateId || 'another';
+          const templateName = TEMPLATES.find(t => t.id === existingTemplateId)?.name || existingTemplateId;
+          setToast(`CV is already generated in the ${templateName} template.`);
         } else if (!saveRes.ok) {
           const errText = await saveRes.text();
           throw new Error(`Status ${saveRes.status}: ${errText}`);
@@ -229,7 +262,8 @@ function CVGeneratorContent() {
             <Button
               onClick={() => setIsDownloadOpen(!isDownloadOpen)}
               className="flex items-center gap-2"
-              disabled={isDownloading}
+              disabled={isDownloading || !!alreadyGeneratedTemplate}
+              title={alreadyGeneratedTemplate ? `Already generated in ${alreadyGeneratedTemplate}` : ''}
             >
               {isDownloading ? (
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

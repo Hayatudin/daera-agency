@@ -336,18 +336,15 @@ export default function AlShablanTemplate({ candidate, facePhoto, fullBodyPhoto 
 
         </div>
 
-        {/* QR Code Video Footer - positioned at bottom of page */}
-        <div className="absolute bottom-[30px] left-[50px] right-[50px] z-20">
-          <CVVideoFooter videoUrl={candidate.videoUrl} />
-        </div>
       </div>
 
       {/* PAGE 2: Passport Scan */}
-      <div className="w-[794px] h-[1123px] relative flex items-center justify-center break-before-page p-8 bg-white">
+      <div className="w-[794px] h-[1123px] relative flex flex-col gap-6 items-center justify-center break-before-page p-8 bg-white">
+        <CVVideoFooter videoUrl={candidate.videoUrl} />
         {candidate.passportImageUrl ? (
-          <img src={candidate.passportImageUrl} alt="Passport" className="max-w-full max-h-full object-contain" />
+          <img src={candidate.passportImageUrl} alt="Passport" className="max-w-full max-h-[85%] object-contain" />
         ) : (
-          <div className="text-gray-400 text-lg border-2 border-dashed border-gray-300 w-full h-full flex items-center justify-center">
+          <div className="text-gray-400 text-lg border-2 border-dashed border-gray-300 w-full h-[85%] flex items-center justify-center">
             Passport Image Not Available
           </div>
         )}

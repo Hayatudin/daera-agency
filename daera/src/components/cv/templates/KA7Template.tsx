@@ -312,16 +312,15 @@ export function KA7Layout({ candidate, facePhoto, fullBodyPhoto, headerImage }: 
           Remarks: SHE IS HARDWORKING, NEAT, ORGANISED, SMART, DISCIPLINED, CARING, HAS A GOOD ATTITUDE, SPEAKS GOOD ENGLISH AND LOVES TAKING CARE OF CHILDREN.
         </div>
 
-        {/* QR Code Video Footer */}
-        <CVVideoFooter videoUrl={candidate.videoUrl} />
       </div>
 
       {/* PAGE 2: Passport Scan */}
-      <div className="p-[8mm] min-h-[297mm] box-border relative flex items-center justify-center break-before-page">
+      <div className="p-[8mm] min-h-[297mm] box-border relative flex flex-col gap-6 items-center justify-center break-before-page">
+        <CVVideoFooter videoUrl={candidate.videoUrl} />
         {candidate.passportImageUrl ? (
-          <img src={candidate.passportImageUrl} alt="Passport Scan" className="max-w-full max-h-[277mm] object-contain shadow-md print:shadow-none" />
+          <img src={candidate.passportImageUrl} alt="Passport Scan" className="max-w-full max-h-[240mm] object-contain shadow-md print:shadow-none" />
         ) : (
-          <div className="text-[#9ca3af] text-lg flex items-center justify-center w-full h-full border-2 border-dashed border-gray-300 font-sans">Passport Image Not Available</div>
+          <div className="text-[#9ca3af] text-lg flex items-center justify-center w-full h-[240mm] border-2 border-dashed border-gray-300 font-sans">Passport Image Not Available</div>
         )}
       </div>
     </div>
