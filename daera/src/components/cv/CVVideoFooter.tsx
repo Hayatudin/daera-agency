@@ -18,23 +18,23 @@ export default function CVVideoFooter({ videoUrl }: CVVideoFooterProps) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: '14px',
-        padding: '8px 16px',
+        gap: '10px',
+        padding: '6px 12px',
         background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-        borderRadius: '10px',
-        margin: '10px 20px 10px 20px',
+        borderRadius: '8px',
+        margin: '0',
       }}
     >
       <div style={{
         background: 'white',
         borderRadius: '6px',
-        padding: '4px',
+        padding: '3px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         flexShrink: 0,
       }}>
-        <QRCode url={videoUrl} size={60} />
+        <QRCode url={videoUrl} size={45} />
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
         <span style={{

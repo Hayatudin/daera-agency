@@ -123,12 +123,12 @@ export default function ALMTemplate({ candidate, facePhoto, fullBodyPhoto }: CVT
         </div>
 
         {/* Bottom Section: Full body photo + Remaining Tables */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-stretch">
           {/* Full body photo */}
-          <div className="w-[190px] shrink-0">
-            <div className="border-[1.5px] border-black h-[565px] p-1 bg-white">
+          <div className="w-[190px] shrink-0 flex flex-col">
+            <div className="border-[1.5px] border-black p-1 bg-white flex-1 relative min-h-0">
               {fullBodyPhoto ? (
-                <img src={fullBodyPhoto} className="w-full h-full object-cover border border-gray-200" alt="Full Body" />
+                <img src={fullBodyPhoto} className="absolute top-1 left-1 w-[calc(100%-8px)] h-[calc(100%-8px)] object-contain border border-gray-200" alt="Full Body" />
               ) : (
                 <div className="w-full h-full bg-[#f3f4f6] flex items-center justify-center text-xs text-[#9ca3af] text-center">Full Body Photo<br />(190x565)</div>
               )}

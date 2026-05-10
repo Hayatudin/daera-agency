@@ -337,7 +337,7 @@ export default function AlShablanTemplate({ candidate, facePhoto, fullBodyPhoto 
         </div>
 
         {/* QR Code Video Footer - positioned at bottom of page */}
-        <div className="relative z-10 px-[50px]">
+        <div className="absolute bottom-[30px] left-[50px] right-[50px] z-20">
           <CVVideoFooter videoUrl={candidate.videoUrl} />
         </div>
       </div>

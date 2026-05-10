@@ -62,8 +62,8 @@ function KU2Layout({ candidate, facePhoto, fullBodyPhoto }: CVTemplateProps) {
             </table>
           </div>
         </div>
-        <div className="flex gap-2">
-          <div className="w-[190px] shrink-0"><div className="border-[1.5px] border-black h-[565px] p-1 bg-white">{fullBodyPhoto ? <img src={fullBodyPhoto} className="w-full h-full object-cover border border-gray-200" alt="Full Body" /> : <div className="w-full h-full bg-[#f3f4f6] flex items-center justify-center text-xs text-[#9ca3af]">Full Body Photo</div>}</div></div>
+        <div className="flex gap-2 items-stretch">
+          <div className="w-[190px] shrink-0 flex flex-col"><div className="border-[1.5px] border-black p-1 bg-white flex-1 relative min-h-0">{fullBodyPhoto ? <img src={fullBodyPhoto} className="absolute top-1 left-1 w-[calc(100%-8px)] h-[calc(100%-8px)] object-contain border border-gray-200" alt="Full Body" /> : <div className="w-full h-full bg-[#f3f4f6] flex items-center justify-center text-xs text-[#9ca3af]">Full Body Photo</div>}</div></div>
           <div className="flex-1 flex flex-col gap-0">
             <table className="w-full border-collapse border-[1.5px] border-black text-[13px] leading-tight mb-[-1.5px]">
               <thead><tr className="bg-[#b0c4de]"><th colSpan={3} className="border-[1.5px] border-black text-center font-bold py-1.5">Details of Applicant <span dir="rtl" className="ml-2 font-bold">بيانات مقدم الطلب</span></th></tr></thead>

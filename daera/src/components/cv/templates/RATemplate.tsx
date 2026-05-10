@@ -296,9 +296,9 @@ export function RALayout({ candidate, facePhoto, fullBodyPhoto, headerImage }: C
               </table>
 
               {/* Full Body Photo container fills the rest */}
-              <div className="flex-1 w-full border-l-0 border-r-0 border-b-0 p-1 flex items-center justify-center bg-white min-h-[250px] max-h-[350px]">
+              <div className="flex-1 w-full border-l-0 border-r-0 border-b-0 p-1 flex items-center justify-center bg-white min-h-0 relative">
                 {fullBodyPhoto ? (
-                  <img src={fullBodyPhoto} className="w-full h-full object-contain object-top" alt="Full Body" />
+                  <img src={fullBodyPhoto} className="absolute inset-1 w-[calc(100%-8px)] h-[calc(100%-8px)] object-contain object-top" alt="Full Body" />
                 ) : (
                   <div className="text-xs text-[#9ca3af] font-sans">Full Body Photo</div>
                 )}
