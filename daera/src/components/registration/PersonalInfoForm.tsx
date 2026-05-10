@@ -27,9 +27,11 @@ interface PersonalInfoFormProps {
   onBrokerCreate?: (name: string) => void;
   fullBodyPhoto?: string | null;
   onFullBodyPhotoChange?: (url: string) => void;
+  videoUrl?: string;
+  onVideoUrlChange?: (url: string) => void;
 }
 
-export default function PersonalInfoForm({ data, onChange, passportData, onPassportChange, passportImage, onPassportImageChange, facePhoto, onFacePhotoChange, brokers, onBrokerCreate, fullBodyPhoto, onFullBodyPhotoChange }: PersonalInfoFormProps) {
+export default function PersonalInfoForm({ data, onChange, passportData, onPassportChange, passportImage, onPassportImageChange, facePhoto, onFacePhotoChange, brokers, onBrokerCreate, fullBodyPhoto, onFullBodyPhotoChange, videoUrl, onVideoUrlChange }: PersonalInfoFormProps) {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const faceInputRef = React.useRef<HTMLInputElement>(null);
   const fullBodyInputRef = React.useRef<HTMLInputElement>(null);
@@ -579,6 +581,21 @@ export default function PersonalInfoForm({ data, onChange, passportData, onPassp
           <Input label="Relative kinship" value={data.emergencyContactRelation} onChange={e => handleChangeUpper('emergencyContactRelation', e.target.value)} required placeholder="e.g. FATHER" />
           <Input label="Relative phone" type="tel" value={data.emergencyContactPhone} onChange={e => onChange('emergencyContactPhone', e.target.value)} required />
           <Input label="Relative address" value={data.emergencyContactAddress} onChange={e => handleChangeUpper('emergencyContactAddress', e.target.value)} required />
+        </div>
+      </section>
+
+      {/* 7. Video Link for QR Code */}
+      <section className="pt-4 border-t border-slate-100">
+        <h3 className="text-xl font-bold text-text-primary mb-2">Video Link</h3>
+        <p className="text-sm text-text-secondary mb-4">Add a video URL for this candidate. A QR code will be automatically generated on the CV.</p>
+        <div className="max-w-xl">
+          <Input 
+            label="Video URL" 
+            type="url"
+            value={videoUrl || ''} 
+            onChange={e => onVideoUrlChange?.(e.target.value)} 
+            placeholder="https://youtube.com/watch?v=..." 
+          />
         </div>
       </section>
 

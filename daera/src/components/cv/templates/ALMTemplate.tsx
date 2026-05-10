@@ -1,5 +1,6 @@
 import React from 'react';
 import { Candidate } from '@/types';
+import CVVideoFooter from '../CVVideoFooter';
 
 interface CVTemplateProps {
   candidate: Candidate;
@@ -316,6 +317,9 @@ export default function ALMTemplate({ candidate, facePhoto, fullBodyPhoto }: CVT
             </tr>
           </tbody>
         </table>
+
+        {/* QR Code Video Footer */}
+        <CVVideoFooter videoUrl={candidate.videoUrl} />
       </div>
 
       {/* PAGE 2: Passport Scan */}

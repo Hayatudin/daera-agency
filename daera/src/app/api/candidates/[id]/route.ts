@@ -76,6 +76,7 @@ export async function GET(
       status: c.status,
       isRequested: c.isRequested,
       visaOrContractNumber: c.visaOrContractNumber || null,
+      videoUrl: c.videoUrl || null,
       registeredAt: c.registeredAt.toISOString(),
       broker: c.broker,
       latestCVTemplate: c.generatedCVs?.[0]?.templateId || null,
@@ -167,6 +168,7 @@ export async function PUT(
         ...(candidateIdImageUrl && { candidateIdImageUrl }),
         ...(relativeIdImageUrl && { relativeIdImageUrl }),
         ...(labourIdUrl && { labourIdUrl }),
+        videoUrl: body.videoUrl || null,
       },
     });
 

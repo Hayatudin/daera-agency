@@ -1,5 +1,6 @@
 import React from 'react';
 import { Candidate } from '@/types';
+import CVVideoFooter from '../CVVideoFooter';
 
 interface CVTemplateProps {
   candidate: Candidate;
@@ -147,6 +148,11 @@ export default function UssusTemplate({ candidate, facePhoto, fullBodyPhoto }: C
             </div>
           </div>
 
+        </div>
+
+        {/* QR Code Video Footer */}
+        <div className="absolute bottom-[10px] left-[75px] right-[75px] z-20">
+          <CVVideoFooter videoUrl={candidate.videoUrl} />
         </div>
       </div>
     </div>

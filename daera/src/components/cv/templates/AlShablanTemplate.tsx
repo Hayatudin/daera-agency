@@ -1,5 +1,6 @@
 import React from 'react';
 import { Candidate } from '@/types';
+import CVVideoFooter from '../CVVideoFooter';
 
 interface CVTemplateProps {
   candidate: Candidate;
@@ -333,6 +334,11 @@ export default function AlShablanTemplate({ candidate, facePhoto, fullBodyPhoto 
 
           </div>
 
+        </div>
+
+        {/* QR Code Video Footer - positioned at bottom of page */}
+        <div className="relative z-10 px-[50px]">
+          <CVVideoFooter videoUrl={candidate.videoUrl} />
         </div>
       </div>
 

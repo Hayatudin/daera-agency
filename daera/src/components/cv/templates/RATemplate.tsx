@@ -1,5 +1,6 @@
 import React from 'react';
 import { Candidate } from '@/types';
+import CVVideoFooter from '../CVVideoFooter';
 
 interface CVTemplateProps {
   candidate: Candidate;
@@ -310,6 +311,9 @@ export function RALayout({ candidate, facePhoto, fullBodyPhoto, headerImage }: C
         <div className={`w-full mt-1 px-2 py-1 border-2 border-black ${bgLightBlue} text-[10px] font-bold uppercase text-center`}>
           Remarks: SHE IS HARDWORKING, NEAT, ORGANISED, SMART, DISCIPLINED, CARING, HAS A GOOD ATTITUDE, SPEAKS GOOD ENGLISH AND LOVES TAKING CARE OF CHILDREN.
         </div>
+
+        {/* QR Code Video Footer */}
+        <CVVideoFooter videoUrl={candidate.videoUrl} />
       </div>
 
       {/* PAGE 2: Passport Scan */}

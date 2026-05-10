@@ -1,5 +1,6 @@
 import React from 'react';
 import { Candidate } from '@/types';
+import CVVideoFooter from '../CVVideoFooter';
 
 interface CVTemplateProps {
   candidate: Candidate;
@@ -167,6 +168,9 @@ function ALMLayoutWithHeader({ candidate, facePhoto, fullBodyPhoto, headerImage 
             <tr><td className="border-[1.5px] border-black px-1.5 py-1 text-[#0066cc] font-bold">Remarks</td><td className="border-[1.5px] border-black px-1.5 py-1 text-center" colSpan={5}></td></tr>
           </tbody>
         </table>
+
+        {/* QR Code Video Footer */}
+        <CVVideoFooter videoUrl={candidate.videoUrl} />
       </div>
 
       <div className="p-[10mm] min-h-[297mm] box-border relative flex items-center justify-center break-before-page">

@@ -48,6 +48,7 @@ function RegistrationContent() {
   const [brokers, setBrokers] = useState<{ id: string, name: string }[]>([]);
   const [importMethod, setImportMethod] = useState<'musaned' | 'passport'>('musaned');
   const [registeredCandidateId, setRegisteredCandidateId] = useState<string | null>(null);
+  const [videoUrl, setVideoUrl] = useState('');
 
   // Musaned drag & drop
   const [isDragOver, setIsDragOver] = useState(false);
@@ -96,6 +97,7 @@ function RegistrationContent() {
       setPersonalInfo(c.personalInfo);
       setPassportImage(c.passportImageUrl || null);
       setFacePhoto(c.facePhotoUrl || null);
+      setVideoUrl(c.videoUrl || '');
       setProcessingComplete(true);
     }
   }, [editId, candidates]);
@@ -256,6 +258,7 @@ function RegistrationContent() {
           passportImageUrl: compressedPassport,
           facePhotoUrl: compressedFace,
           fullBodyPhotoUrl: compressedFullBody,
+          videoUrl: videoUrl || null,
           status: 'pending',
         }),
       });
@@ -291,7 +294,7 @@ function RegistrationContent() {
             setSubmitted(false); setStep(1); setPassportImage(null); setFacePhoto(null); setFullBodyPhoto(null);
             setProcessingComplete(false); setPassportData(emptyPassportData);
             setPersonalInfo(emptyPersonalInfo); setMusanedSuccess(false);
-            setImportMethod('musaned');
+            setImportMethod('musaned'); setVideoUrl('');
           }}>
             Add Another Candidate
           </Button>
@@ -482,6 +485,8 @@ function RegistrationContent() {
             onBrokerCreate={handleCreateBroker}
             fullBodyPhoto={fullBodyPhoto}
             onFullBodyPhotoChange={setFullBodyPhoto}
+            videoUrl={videoUrl}
+            onVideoUrlChange={setVideoUrl}
           />
         )}
 

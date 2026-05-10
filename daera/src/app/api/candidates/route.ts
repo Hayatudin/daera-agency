@@ -71,6 +71,7 @@ export async function GET() {
       isRequested: c.isRequested || false,
       visaOrContractNumber: c.visaOrContractNumber || null,
       isFlagged: c.isFlagged || false,
+      videoUrl: c.videoUrl || null,
       registeredAt: c.registeredAt.toISOString(),
       status: c.status,
       generatedCVs: c.generatedCVs?.map(cv => cv.templateId) || [],
@@ -166,6 +167,7 @@ export async function POST(request: Request) {
         candidateIdImageUrl,
         relativeIdImageUrl,
         labourIdUrl,
+        videoUrl: body.videoUrl || null,
         status: body.status || 'pending',
       },
     });

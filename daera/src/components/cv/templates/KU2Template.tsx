@@ -1,6 +1,7 @@
 import React from 'react';
 import { Candidate } from '@/types';
 import MATemplate from './MATemplate';
+import CVVideoFooter from '../CVVideoFooter';
 
 // KU2 uses the exact same layout as ALM/MA, just with /KU2.png header
 // We import the shared ALMLayoutWithHeader from MATemplate pattern
@@ -106,6 +107,9 @@ function KU2Layout({ candidate, facePhoto, fullBodyPhoto }: CVTemplateProps) {
             <tr><td className="border-[1.5px] border-black px-1.5 py-1 text-[#0066cc] font-bold">Remarks</td><td className="border-[1.5px] border-black px-1.5 py-1 text-center" colSpan={5}></td></tr>
           </tbody>
         </table>
+
+        {/* QR Code Video Footer */}
+        <CVVideoFooter videoUrl={candidate.videoUrl} />
       </div>
       <div className="p-[10mm] min-h-[297mm] box-border relative flex items-center justify-center break-before-page">
         {candidate.passportImageUrl ? <img src={candidate.passportImageUrl} alt="Passport Scan" className="max-w-full max-h-[277mm] object-contain shadow-md print:shadow-none" /> : <div className="text-[#9ca3af] text-lg flex items-center justify-center w-full h-full border-2 border-dashed border-gray-300">Passport Image Not Available</div>}
