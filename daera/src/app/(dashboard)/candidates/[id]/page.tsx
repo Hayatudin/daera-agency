@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/api-client';
+
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -20,7 +22,7 @@ export default function CandidateDetailPage() {
   useEffect(() => {
     async function fetchCandidate() {
       try {
-        const res = await fetch(`/api/candidates/${params.id}`);
+        const res = await apiFetch(`/api/candidates/${params.id}`);
         if (!res.ok) throw new Error('Not found');
         const data = await res.json();
         setCandidate(data);
@@ -37,7 +39,7 @@ export default function CandidateDetailPage() {
     if (!candidate) return;
     if (!confirm('Are you sure you want to delete this candidate? This action cannot be undone.')) return;
     try {
-      await fetch(`/api/candidates/${candidate.id}`, { method: 'DELETE' });
+      await apiFetch(`/api/candidates/${candidate.id}`, { method: 'DELETE' });
       router.push('/candidates');
     } catch { alert('Failed to delete'); }
   };

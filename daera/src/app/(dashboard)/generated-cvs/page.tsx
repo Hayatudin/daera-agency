@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/api-client';
+
 
 import React, { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import ReactDOM from 'react-dom';
@@ -343,7 +345,7 @@ export default function GeneratedCVsPage() {
   const fetchCVs = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch('/api/generated-cvs', { cache: 'no-store' });
+      const res = await apiFetch('/api/generated-cvs', { cache: 'no-store' });
       if (!res.ok) throw new Error('Failed');
       const data = await res.json();
       setCvs(data.filter((c: any) => !c.candidate.isRequested && c.candidate.medicalStatus !== 'Unfit'));
@@ -361,7 +363,7 @@ export default function GeneratedCVsPage() {
     if (!deleteTarget) return;
     setActionLoading(true);
     try {
-      const res = await fetch(`/api/generated-cvs/${deleteTarget.id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/api/generated-cvs/${deleteTarget.id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed');
       setCvs(prev => prev.filter(c => c.id !== deleteTarget.id));
       showToast('CV record deleted successfully');
@@ -378,7 +380,7 @@ export default function GeneratedCVsPage() {
     if (!changeTarget) return;
     setActionLoading(true);
     try {
-      const res = await fetch(`/api/generated-cvs/${changeTarget.id}`, {
+      const res = await apiFetch(`/api/generated-cvs/${changeTarget.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ templateId: newTemplateId }),
@@ -407,7 +409,7 @@ export default function GeneratedCVsPage() {
     if (!changeTarget) return;
     setActionLoading(true);
     try {
-      const res = await fetch(`/api/generated-cvs/${changeTarget.id}`, {
+      const res = await apiFetch(`/api/generated-cvs/${changeTarget.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ templateId: newTemplateId }),
@@ -443,7 +445,7 @@ export default function GeneratedCVsPage() {
   // ── Toggle Flag ────────────────────────────────────────────────────────────
   const toggleFlag = async (cvId: string, candidateId: string, currentFlagStatus: boolean) => {
     try {
-      const res = await fetch(`/api/candidates/${candidateId}`, {
+      const res = await apiFetch(`/api/candidates/${candidateId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isFlagged: !currentFlagStatus }),
@@ -504,19 +506,22 @@ export default function GeneratedCVsPage() {
             fullBodyPhoto: downloadingCv.fullBodyPhotoUrl || downloadingCv.candidate.fullBodyPhotoUrl
           };
 
-          const response = await fetch('/api/cv/generate', {
+          const response = await apiFetch('/api/cv/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           });
 
-          if (!response.ok) throw new Error('Failed to generate DOCX');
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || errorData.message || 'Failed to generate DOCX');
+          }
 
           const blob = await response.blob();
           downloadBlob(blob, `${fileName}.docx`);
           showToast('Editable DOCX Downloaded!');
         } else if (downloadFormat === 'jpg') {
-          const res = await fetch(dataUrl);
+          const res = await apiFetch(dataUrl);
           downloadBlob(await res.blob(), `${fileName}.jpg`);
           showToast('Downloaded as JPG');
         } else {
@@ -532,8 +537,8 @@ export default function GeneratedCVsPage() {
           downloadBlob(pdf.output('blob'), `${fileName}.pdf`);
           showToast('Downloaded as PDF');
         }
-      } catch (e) {
-        if (!cancelled) showToast('Download failed', 'error');
+      } catch (e: any) {
+        if (!cancelled) showToast(e.message || 'Download failed', 'error');
       } finally {
         if (!cancelled) { setIsDownloading(false); setDownloadingCv(null); setDownloadFormat(null); }
       }
@@ -688,7 +693,7 @@ export default function GeneratedCVsPage() {
             facePhoto: cv.facePhotoUrl || cv.candidate.facePhotoUrl || cv.candidate.passportImageUrl,
             fullBodyPhoto: cv.fullBodyPhotoUrl || cv.candidate.fullBodyPhotoUrl
           };
-          const response = await fetch('/api/cv/generate', {
+          const response = await apiFetch('/api/cv/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -697,7 +702,7 @@ export default function GeneratedCVsPage() {
           const blob = await response.blob();
           zip.file(`${safeName}.docx`, blob);
         } else if (format === 'jpg') {
-          const res = await fetch(dataUrl);
+          const res = await apiFetch(dataUrl);
           const blob = await res.blob();
           zip.file(`${safeName}.jpg`, blob);
         } else {

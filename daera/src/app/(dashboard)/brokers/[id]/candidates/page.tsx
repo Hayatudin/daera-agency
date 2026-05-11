@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/api-client';
+
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -35,7 +37,7 @@ export default function BrokerCandidatesPage() {
       if (startDate) url += `&startDate=${startDate}`;
       if (endDate) url += `&endDate=${endDate}`;
       
-      const res = await fetch(url);
+      const res = await apiFetch(url);
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();
       setBroker(data);

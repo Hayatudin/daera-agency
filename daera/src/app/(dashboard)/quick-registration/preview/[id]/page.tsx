@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/api-client';
+
 
 import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
@@ -64,7 +66,7 @@ export default function QuickRegistrationPreviewPage({ params }: { params: Promi
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch(`/api/quick-registrations/${id}`);
+        const res = await apiFetch(`/api/quick-registrations/${id}`);
         if (!res.ok) throw new Error('Failed to load data');
         const json = await res.json();
         setData(json);

@@ -1,5 +1,4 @@
 'use client';
-
 import React from 'react';
 import { PassportData, CandidatePersonalInfo } from '@/types';
 import { formatDate } from '@/lib/utils';

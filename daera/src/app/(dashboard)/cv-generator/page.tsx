@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch, getMediaUrl } from '@/lib/api-client';
+
 
 import React, { useState, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -42,7 +44,7 @@ function CVGeneratorContent() {
   const [alreadyGeneratedTemplate, setAlreadyGeneratedTemplate] = useState<string | null>(null);
 
   React.useEffect(() => {
-    fetch('/api/generated-cvs')
+    apiFetch('/api/generated-cvs')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setGeneratedCvs(data);
@@ -79,8 +81,8 @@ function CVGeneratorContent() {
 
   const selectedCandidate = candidates.find(c => c.id === selectedCandidateId) || null;
 
-  const facePhoto = selectedCandidate?.facePhotoUrl || selectedCandidate?.passportImageUrl || null;
-  const fullBodyPhoto = selectedCandidate?.fullBodyPhotoUrl || null;
+  const facePhoto = getMediaUrl(selectedCandidate?.facePhotoUrl || selectedCandidate?.passportImageUrl);
+  const fullBodyPhoto = getMediaUrl(selectedCandidate?.fullBodyPhotoUrl);
 
   const handleDownload = async (format: 'pdf' | 'jpg' | 'doc') => {
     if (!cvRef.current || !selectedCandidate) return;
@@ -135,7 +137,7 @@ function CVGeneratorContent() {
 
       if (format === 'jpg') {
         // Convert large dataUrl to blob to avoid Chrome URL length limits which break the 'download' attribute
-        const res = await fetch(dataUrl);
+        const res = await apiFetch(dataUrl);
         const blob = await res.blob();
         downloadBlob(blob, `${fileName}.jpg`);
         setToast('CV Downloaded as JPG');
@@ -170,13 +172,16 @@ function CVGeneratorContent() {
           fullBodyPhoto
         };
 
-        const response = await fetch('/api/cv/generate', {
+        const response = await apiFetch('/api/cv/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
 
-        if (!response.ok) throw new Error('Failed to generate DOCX');
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || errorData.message || 'Failed to generate DOCX');
+        }
 
         const blob = await response.blob();
         downloadBlob(blob, `${fileName}.docx`);
@@ -185,7 +190,7 @@ function CVGeneratorContent() {
 
       // Auto-save the generated CV to the database
       try {
-        const saveRes = await fetch('/api/generated-cvs', {
+        const saveRes = await apiFetch('/api/generated-cvs', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -210,9 +215,9 @@ function CVGeneratorContent() {
         // Don't show error to user since download succeeded
       }
 
-    } catch (err) {
+    } catch (err: any) {
       console.error('Download Error:', err);
-      alert('Failed to generate file. Please try again.');
+      alert(err.message || 'Failed to generate file. Please try again.');
     } finally {
       setIsDownloading(false);
       setTimeout(() => setToast(null), 3000);

@@ -1,4 +1,5 @@
 import React from 'react';
+import { getMediaUrl } from '@/lib/api-client';
 import { Candidate } from '@/types';
 import CVVideoFooter from '../CVVideoFooter';
 
@@ -59,6 +60,12 @@ export default function AlShablanTemplate({ candidate, facePhoto, fullBodyPhoto 
   // Let's create the JSX structure accurately.
   return (
     <div className="w-[794px] mx-auto bg-white text-black font-serif shadow-lg print:shadow-none relative" dir="ltr">
+      {candidate.isFlagged && (
+        <div className="absolute top-4 right-4 bg-red-600 text-white px-4 py-1.5 rounded-full font-bold text-sm shadow-lg z-50 flex items-center gap-2 animate-pulse print:animate-none">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          FLAGGED
+        </div>
+      )}
       
       {/* PAGE 1: Profile Sheet */}
       <div className="w-[794px] h-[1123px] relative overflow-hidden page-break-after-always">
@@ -79,7 +86,7 @@ export default function AlShablanTemplate({ candidate, facePhoto, fullBodyPhoto 
             {/* Face Photo */}
             <div className="w-[220px] h-[220px] border border-black p-1 shrink-0 bg-white">
               {facePhoto ? (
-                <img src={facePhoto} className="w-full h-full object-cover" alt="Face" />
+                <img src={getMediaUrl(facePhoto)} className="w-full h-full object-cover" alt="Face" />
               ) : (
                 <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 text-sm">Face Photo</div>
               )}
@@ -324,7 +331,7 @@ export default function AlShablanTemplate({ candidate, facePhoto, fullBodyPhoto 
               {/* Full Body Photo */}
               <div className="flex-1 border border-black p-1 bg-white mt-2 relative min-h-0 flex items-center justify-center">
                 {fullBodyPhoto ? (
-                  <img src={fullBodyPhoto} className="absolute top-1 left-1 w-[calc(100%-8px)] h-[calc(100%-8px)] object-contain" alt="Full Body" />
+                  <img src={getMediaUrl(fullBodyPhoto)} className="absolute top-1 left-1 w-[calc(100%-8px)] h-[calc(100%-8px)] object-contain border border-gray-200" alt="Full Body" />
                 ) : (
                   <div className="text-gray-400 text-sm">Full Body Photo</div>
                 )}
@@ -342,7 +349,7 @@ export default function AlShablanTemplate({ candidate, facePhoto, fullBodyPhoto 
       <div className="w-[794px] h-[1123px] relative flex flex-col gap-6 items-center justify-center break-before-page p-8 bg-white">
         <CVVideoFooter videoUrl={candidate.videoUrl} />
         {candidate.passportImageUrl ? (
-          <img src={candidate.passportImageUrl} alt="Passport" className="max-w-full max-h-[85%] object-contain" />
+          <img src={getMediaUrl(candidate.passportImageUrl)} alt="Passport" className="max-w-full max-h-[85%] object-contain" />
         ) : (
           <div className="text-gray-400 text-lg border-2 border-dashed border-gray-300 w-full h-[85%] flex items-center justify-center">
             Passport Image Not Available

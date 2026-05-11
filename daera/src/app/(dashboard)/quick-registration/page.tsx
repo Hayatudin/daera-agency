@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/api-client';
+
 
 import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -52,7 +54,7 @@ export default function QuickRegistrationPage() {
       });
       setOcrProgress(90);
       const ocrText = result.data.text;
-      const response = await fetch('/api/ocr/passport', {
+      const response = await apiFetch('/api/ocr/passport', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ocrText }),
@@ -101,7 +103,7 @@ export default function QuickRegistrationPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/quick-registrations', {
+      const response = await apiFetch('/api/quick-registrations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

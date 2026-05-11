@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/api-client';
+
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -59,7 +61,7 @@ function RegistrationContent() {
   useEffect(() => {
     async function fetchBrokers() {
       try {
-        const res = await fetch('/api/brokers');
+        const res = await apiFetch('/api/brokers');
         const data = await res.json();
         setBrokers(Array.isArray(data) ? data : []);
       } catch { /* ignore */ }
@@ -69,7 +71,7 @@ function RegistrationContent() {
 
   const handleCreateBroker = async (name: string) => {
     try {
-      const res = await fetch('/api/brokers', {
+      const res = await apiFetch('/api/brokers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name })
@@ -125,7 +127,7 @@ function RegistrationContent() {
       });
       setOcrProgress(90);
       const ocrText = result.data.text;
-      const response = await fetch('/api/ocr/passport', {
+      const response = await apiFetch('/api/ocr/passport', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ocrText }),
@@ -154,7 +156,7 @@ function RegistrationContent() {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const res = await fetch('/api/extract/musaned', { method: 'POST', body: formData });
+      const res = await apiFetch('/utils_api/extract/musaned', { method: 'POST', body: formData });
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || 'Failed to process PDF');
 
@@ -242,7 +244,7 @@ function RegistrationContent() {
       const url = isEditMode ? `/api/candidates/${editId}` : '/api/candidates';
       const method = isEditMode ? 'PUT' : 'POST';
 
-      const response = await fetch(url, {
+      const response = await apiFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -264,15 +266,23 @@ function RegistrationContent() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to submit registration');
+        let errorMessage = 'Failed to submit registration';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.message || errorMessage;
+          console.error('Registration server error:', errorData);
+        } catch (e) {
+          console.error('Failed to parse error response:', e);
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
       setRegisteredCandidateId(data.id);
       setSubmitted(true);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Something went wrong');
+      console.error('Registration submission error:', err);
+      alert(err instanceof Error ? `Error: ${err.message}` : 'Something went wrong during registration');
     } finally {
       setIsSubmitting(false);
     }

@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/api-client';
 import React, { useRef } from 'react';
 import { UploadCloud, FileText, Loader2, CheckCircle2 } from 'lucide-react';
 import { PassportData, CandidatePersonalInfo } from '@/types';
@@ -31,7 +32,7 @@ export default function MusanedUploader({ onDataExtracted, isProcessing, setIsPr
       const formData = new FormData();
       formData.append('file', file);
 
-      const res = await fetch('/api/extract/musaned', {
+      const res = await apiFetch('/utils_api/extract/musaned', {
         method: 'POST',
         body: formData,
       });

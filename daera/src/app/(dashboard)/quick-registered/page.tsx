@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/api-client';
+
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -24,7 +26,7 @@ export default function QuickRegisteredPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch('/api/quick-registrations');
+        const res = await apiFetch('/api/quick-registrations');
         const data = await res.json();
         if (Array.isArray(data)) setRegistrations(data);
       } catch (err) {

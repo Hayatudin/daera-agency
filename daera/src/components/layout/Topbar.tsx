@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/api-client';
+
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -40,7 +42,7 @@ export default function Topbar({ onMobileMenuToggle }: TopbarProps) {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const res = await fetch('/api/notifications');
+        const res = await apiFetch('/api/notifications');
         const data = await res.json();
         if (Array.isArray(data)) {
           setNotifications(data);
@@ -55,7 +57,7 @@ export default function Topbar({ onMobileMenuToggle }: TopbarProps) {
 
   const markAllRead = async () => {
     try {
-      await fetch('/api/notifications', {
+      await apiFetch('/api/notifications', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ markAllRead: true }),
@@ -76,7 +78,7 @@ export default function Topbar({ onMobileMenuToggle }: TopbarProps) {
 
       setIsSearching(true);
       try {
-        const res = await fetch(`/api/search/candidates?q=${encodeURIComponent(searchQuery)}`);
+        const res = await apiFetch(`/api/search/candidates?q=${encodeURIComponent(searchQuery)}`);
         const data = await res.json();
         setResults(data);
         setShowResults(true);

@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/api-client';
+
 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
@@ -49,7 +51,7 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
     setError('');
     setLoading(true);
     try {
-      const res = await fetch('/api/users', {
+      const res = await apiFetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password, role }),
@@ -139,7 +141,7 @@ export default function UsersPage() {
   const fetchUsers = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/users');
+      const res = await apiFetch('/api/users');
       if (!res.ok) throw new Error();
       setUsers(await res.json());
     } catch {
@@ -160,7 +162,7 @@ export default function UsersPage() {
 
   const updateRole = async (userId: string, role: Role) => {
     try {
-      const res = await fetch(`/api/users/${userId}`, {
+      const res = await apiFetch(`/api/users/${userId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role }),
@@ -177,7 +179,7 @@ export default function UsersPage() {
   const deleteUser = async (userId: string) => {
     if (!confirm('Are you sure you want to permanently delete this user?')) return;
     try {
-      const res = await fetch(`/api/users/${userId}`, { method: 'DELETE' });
+      const res = await apiFetch(`/api/users/${userId}`, { method: 'DELETE' });
       if (!res.ok) throw new Error();
       setUsers(prev => prev.filter(u => u.id !== userId));
       showMsg('User deleted');

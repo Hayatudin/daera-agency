@@ -1,4 +1,5 @@
 import React from 'react';
+import { getMediaUrl } from '@/lib/api-client';
 import { Candidate } from '@/types';
 import CVVideoFooter from '../CVVideoFooter';
 
@@ -67,6 +68,12 @@ export function KA7Layout({ candidate, facePhoto, fullBodyPhoto, headerImage }: 
     <div className="w-full max-w-[210mm] mx-auto bg-white text-black font-serif shadow-lg print:shadow-none" dir="ltr">
       {/* PAGE 1 */}
       <div className="p-[8mm] min-h-[297mm] box-border relative page-break-after-always flex flex-col">
+        {candidate.isFlagged && (
+          <div className="absolute top-4 right-4 bg-red-600 text-white px-4 py-1.5 rounded-full font-bold text-sm shadow-lg z-50 flex items-center gap-2 animate-pulse print:animate-none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+            FLAGGED
+          </div>
+        )}
         {/* Header */}
         <div className="w-full h-[100px] mb-2 shrink-0">
           <img src={headerImage} alt="Agency Header" className="w-full h-full object-contain object-center" />
@@ -81,7 +88,7 @@ export function KA7Layout({ candidate, facePhoto, fullBodyPhoto, headerImage }: 
               <tr>
                 <td rowSpan={7} className="border border-black p-0 w-[24%] align-top h-[180px]">
                   {facePhoto ? (
-                    <img src={facePhoto} className="w-full h-full object-cover" alt="Face" />
+                    <img src={getMediaUrl(facePhoto)} className="w-full h-full object-cover" alt="Face" />
                   ) : (
                     <div className="w-full h-full bg-[#f3f4f6] flex items-center justify-center text-xs text-[#9ca3af] font-sans">Photo</div>
                   )}
@@ -298,7 +305,7 @@ export function KA7Layout({ candidate, facePhoto, fullBodyPhoto, headerImage }: 
               {/* Full Body Photo container fills the rest */}
               <div className="flex-1 w-full border-l-0 border-r-0 border-b-0 p-1 flex items-center justify-center bg-white min-h-0 relative">
                 {fullBodyPhoto ? (
-                  <img src={fullBodyPhoto} className="absolute inset-1 w-[calc(100%-8px)] h-[calc(100%-8px)] object-contain object-top" alt="Full Body" />
+                  <img src={getMediaUrl(fullBodyPhoto)} className="absolute inset-1 w-[calc(100%-8px)] h-[calc(100%-8px)] object-contain object-top" alt="Full Body" />
                 ) : (
                   <div className="text-xs text-[#9ca3af] font-sans">Full Body Photo</div>
                 )}
@@ -318,7 +325,7 @@ export function KA7Layout({ candidate, facePhoto, fullBodyPhoto, headerImage }: 
       <div className="p-[8mm] min-h-[297mm] box-border relative flex flex-col gap-6 items-center justify-center break-before-page">
         <CVVideoFooter videoUrl={candidate.videoUrl} />
         {candidate.passportImageUrl ? (
-          <img src={candidate.passportImageUrl} alt="Passport Scan" className="max-w-full max-h-[240mm] object-contain shadow-md print:shadow-none" />
+          <img src={getMediaUrl(candidate.passportImageUrl)} alt="Passport Scan" className="max-w-full max-h-[240mm] object-contain shadow-md print:shadow-none" />
         ) : (
           <div className="text-[#9ca3af] text-lg flex items-center justify-center w-full h-[240mm] border-2 border-dashed border-gray-300 font-sans">Passport Image Not Available</div>
         )}

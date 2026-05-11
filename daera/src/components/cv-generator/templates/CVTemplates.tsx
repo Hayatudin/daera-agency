@@ -1,5 +1,4 @@
 'use client';
-
 import React from 'react';
 import { Candidate } from '@/types';
 import { formatDate } from '@/lib/utils';

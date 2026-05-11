@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/api-client';
 import { useState, useEffect } from 'react';
 import { Candidate } from '@/types';
 
@@ -36,7 +37,7 @@ export function useCandidates(initialForceRefresh = false) {
       // Start a new fetch if one isn't already in progress, or if forcing refresh
       if (!fetchPromise || forceRefresh) {
         setIsLoading(true);
-        fetchPromise = fetch('/api/candidates').then(async (res) => {
+        fetchPromise = apiFetch('/api/candidates').then(async (res) => {
           if (!res.ok) throw new Error('Failed to fetch candidates');
           return res.json();
         }).catch(err => {

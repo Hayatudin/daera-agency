@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/api-client';
+
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -31,7 +33,7 @@ export default function FitCandidatesPage() {
     setOpenMenuId(null);
     if (!confirm('Are you sure you want to delete this candidate?')) return;
     try {
-      const res = await fetch(`/api/candidates/${id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/api/candidates/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error();
       mutate(prev => prev.filter(c => c.id !== id));
     } catch { alert('Failed to delete candidate'); }

@@ -1,4 +1,5 @@
 import React from 'react';
+import { getMediaUrl } from '@/lib/api-client';
 import { Candidate } from '@/types';
 import MATemplate from './MATemplate';
 import CVVideoFooter from '../CVVideoFooter';
@@ -44,11 +45,17 @@ function KU2Layout({ candidate, facePhoto, fullBodyPhoto }: CVTemplateProps) {
   return (
     <div className="w-full max-w-[210mm] mx-auto bg-white text-black font-sans shadow-lg print:shadow-none" dir="ltr">
       <div className="p-[10mm] min-h-[297mm] box-border relative page-break-after-always">
+        {candidate.isFlagged && (
+          <div className="absolute top-4 right-4 bg-red-600 text-white px-4 py-1.5 rounded-full font-bold text-sm shadow-lg z-50 flex items-center gap-2 animate-pulse print:animate-none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+            FLAGGED
+          </div>
+        )}
         <div className="w-full h-[120px] mb-4 border border-gray-200">
           <img src="/KU2.png" alt="KU2 Agency Header" className="w-full h-full object-contain object-center" />
         </div>
         <div className="flex gap-2 mb-2">
-          <div className="w-[160px] shrink-0"><div className="border-[1.5px] border-black h-[190px] w-full p-1 bg-white">{facePhoto ? <img src={facePhoto} className="w-full h-full object-cover border border-gray-200" alt="Face" /> : <div className="w-full h-full bg-[#f3f4f6] flex items-center justify-center text-xs text-[#9ca3af]">Face Photo</div>}</div></div>
+          <div className="w-[160px] shrink-0"><div className="border-[1.5px] border-black h-[190px] w-full p-1 bg-white">{facePhoto ? <img src={getMediaUrl(facePhoto)} className="w-full h-full object-cover border border-gray-200" alt="Face" /> : <div className="w-full h-full bg-[#f3f4f6] flex items-center justify-center text-xs text-[#9ca3af]">Face Photo</div>}</div></div>
           <div className="flex-1">
             <table className="w-full border-collapse border-[1.5px] border-black text-[13px] leading-tight">
               <thead><tr><th colSpan={3} className="border-[1.5px] border-black text-center text-[#0066cc] font-bold text-[18px] py-1.5 uppercase">APPLICATION FOR EMPLOYMENT</th></tr></thead>
@@ -63,7 +70,7 @@ function KU2Layout({ candidate, facePhoto, fullBodyPhoto }: CVTemplateProps) {
           </div>
         </div>
         <div className="flex gap-2 items-stretch">
-          <div className="w-[190px] shrink-0 flex flex-col"><div className="border-[1.5px] border-black p-1 bg-white flex-1 relative min-h-0">{fullBodyPhoto ? <img src={fullBodyPhoto} className="absolute top-1 left-1 w-[calc(100%-8px)] h-[calc(100%-8px)] object-contain border border-gray-200" alt="Full Body" /> : <div className="w-full h-full bg-[#f3f4f6] flex items-center justify-center text-xs text-[#9ca3af]">Full Body Photo</div>}</div></div>
+          <div className="w-[190px] shrink-0 flex flex-col"><div className="border-[1.5px] border-black p-1 bg-white flex-1 relative min-h-0">{fullBodyPhoto ? <img src={getMediaUrl(fullBodyPhoto)} className="absolute top-1 left-1 w-[calc(100%-8px)] h-[calc(100%-8px)] object-contain border border-gray-200" alt="Full Body" /> : <div className="w-full h-full bg-[#f3f4f6] flex items-center justify-center text-xs text-[#9ca3af]">Full Body Photo</div>}</div></div>
           <div className="flex-1 flex flex-col gap-0">
             <table className="w-full border-collapse border-[1.5px] border-black text-[13px] leading-tight mb-[-1.5px]">
               <thead><tr className="bg-[#b0c4de]"><th colSpan={3} className="border-[1.5px] border-black text-center font-bold py-1.5">Details of Applicant <span dir="rtl" className="ml-2 font-bold">بيانات مقدم الطلب</span></th></tr></thead>
@@ -111,7 +118,7 @@ function KU2Layout({ candidate, facePhoto, fullBodyPhoto }: CVTemplateProps) {
       </div>
       <div className="p-[10mm] min-h-[297mm] box-border relative flex flex-col gap-6 items-center justify-center break-before-page">
         <CVVideoFooter videoUrl={candidate.videoUrl} />
-        {candidate.passportImageUrl ? <img src={candidate.passportImageUrl} alt="Passport Scan" className="max-w-full max-h-[240mm] object-contain shadow-md print:shadow-none" /> : <div className="text-[#9ca3af] text-lg flex items-center justify-center w-full h-[240mm] border-2 border-dashed border-gray-300">Passport Image Not Available</div>}
+        {candidate.passportImageUrl ? <img src={getMediaUrl(candidate.passportImageUrl)} alt="Passport Scan" className="max-w-full max-h-[240mm] object-contain shadow-md print:shadow-none" /> : <div className="text-[#9ca3af] text-lg flex items-center justify-center w-full h-[240mm] border-2 border-dashed border-gray-300">Passport Image Not Available</div>}
       </div>
     </div>
   );

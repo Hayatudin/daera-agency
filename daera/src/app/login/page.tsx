@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Lock, Mail, Loader2, AlertCircle } from 'lucide-react';

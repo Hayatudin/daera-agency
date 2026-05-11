@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/api-client';
+
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -50,7 +52,7 @@ export default function CandidatesPage() {
         bodyPayload.visaOrContractNumber = null; // Clear if cancelled
       }
 
-      const res = await fetch(`/api/candidates/${id}`, {
+      const res = await apiFetch(`/api/candidates/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bodyPayload),
@@ -69,7 +71,7 @@ export default function CandidatesPage() {
   // Update Medical Status
   const updateMedicalStatus = async (id: string, newStatus: string) => {
     try {
-      const res = await fetch(`/api/candidates/${id}`, {
+      const res = await apiFetch(`/api/candidates/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ medicalStatus: newStatus }),
@@ -92,7 +94,7 @@ export default function CandidatesPage() {
   const toggleFlag = async (id: string, current: boolean) => {
     setOpenMenuId(null);
     try {
-      const res = await fetch(`/api/candidates/${id}`, {
+      const res = await apiFetch(`/api/candidates/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isFlagged: !current }),
@@ -113,7 +115,7 @@ export default function CandidatesPage() {
     setOpenMenuId(null);
     if (!confirm('Are you sure you want to delete this candidate? This action cannot be undone.')) return;
     try {
-      const res = await fetch(`/api/candidates/${id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/api/candidates/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error();
       setCandidates(prev => prev.filter(c => c.id !== id));
     } catch { alert('Failed to delete candidate'); }
@@ -358,7 +360,7 @@ export default function CandidatesPage() {
                             {candidate.isRequested ? (
                               <button onClick={(e) => { e.stopPropagation(); toggleRequested(candidate.id, true); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
                                 <CheckCircle size={16} className="text-amber-500" />
-                                <span>Cancel Visa Selected</span>
+                                <span>Visa Cancelled</span>
                               </button>
                             ) : (
                               <button onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); setVisaModalId(candidate.id); }} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">

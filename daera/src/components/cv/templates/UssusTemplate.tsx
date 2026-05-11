@@ -1,4 +1,5 @@
 import React from 'react';
+import { getMediaUrl } from '@/lib/api-client';
 import { Candidate } from '@/types';
 import CVVideoFooter from '../CVVideoFooter';
 
@@ -44,6 +45,12 @@ export default function UssusTemplate({ candidate, facePhoto, fullBodyPhoto }: C
 
   return (
     <div className="w-[794px] mx-auto bg-white text-black font-sans shadow-lg print:shadow-none relative" dir="ltr">
+      {candidate.isFlagged && (
+        <div className="absolute top-4 right-4 bg-red-600 text-white px-4 py-1.5 rounded-full font-bold text-sm shadow-lg z-50 flex items-center gap-2 animate-pulse print:animate-none">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          FLAGGED
+        </div>
+      )}
       
       {/* PAGE 1: Only one page for Ussus */}
       <div className="w-[794px] h-[1123px] relative overflow-hidden page-break-after-always">
@@ -85,7 +92,7 @@ export default function UssusTemplate({ candidate, facePhoto, fullBodyPhoto }: C
           {/* Top Right: Face Photo */}
           <div className="absolute top-[160px] right-[85px] w-[210px] h-[240px] bg-white flex items-center justify-center p-1 shadow-sm">
             {facePhoto ? (
-              <img src={facePhoto} className="w-full h-full object-cover" alt="Face" />
+              <img src={getMediaUrl(facePhoto)} className="w-full h-full object-cover" alt="Face" />
             ) : (
               <div className="text-gray-400 text-sm">Face Photo</div>
             )}
@@ -94,7 +101,7 @@ export default function UssusTemplate({ candidate, facePhoto, fullBodyPhoto }: C
           {/* Bottom Left: Full Body Photo */}
           <div className="absolute bottom-[90px] left-[75px] w-[290px] h-[480px] bg-white flex items-center justify-center shadow-sm p-1">
             {fullBodyPhoto ? (
-              <img src={fullBodyPhoto} className="w-full h-full object-contain" alt="Full Body" />
+              <img src={getMediaUrl(fullBodyPhoto)} className="w-full h-full object-contain" alt="Full Body" />
             ) : (
               <div className="text-gray-400 text-sm">Full Body Photo</div>
             )}

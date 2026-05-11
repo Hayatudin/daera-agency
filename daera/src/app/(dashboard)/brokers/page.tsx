@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/api-client';
+
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -22,7 +24,7 @@ export default function BrokersPage() {
   const fetchBrokers = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch('/api/brokers', { cache: 'no-store' });
+      const res = await apiFetch('/api/brokers', { cache: 'no-store' });
       const data = await res.json();
       if (Array.isArray(data)) {
         setBrokers(data);
@@ -47,7 +49,7 @@ export default function BrokersPage() {
     if (!newBrokerName.trim()) return;
     try {
       setIsAdding(true);
-      const res = await fetch('/api/brokers', {
+      const res = await apiFetch('/api/brokers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: newBrokerName.trim() }),

@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Download, ChevronDown, FileText, FileImage, File, Check } from 'lucide-react';

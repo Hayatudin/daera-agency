@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/api-client';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import fs from 'fs';
@@ -176,7 +177,7 @@ export async function POST(request: Request) {
       if (!url) return '';
       if (url.startsWith('http')) {
         try {
-          const res = await fetch(url);
+          const res = await apiFetch(url);
           if (!res.ok) return '';
           const arrayBuffer = await res.arrayBuffer();
           return Buffer.from(arrayBuffer).toString('base64');

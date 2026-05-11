@@ -1,4 +1,5 @@
 import React from 'react';
+import { getMediaUrl } from '@/lib/api-client';
 import { Candidate } from '@/types';
 import CVVideoFooter from '../CVVideoFooter';
 
@@ -54,6 +55,12 @@ function ALMLayoutWithHeader({ candidate, facePhoto, fullBodyPhoto, headerImage 
   return (
     <div className="w-full max-w-[210mm] mx-auto bg-white text-black font-sans shadow-lg print:shadow-none" dir="ltr">
       <div className="p-[10mm] min-h-[297mm] box-border relative page-break-after-always">
+        {candidate.isFlagged && (
+          <div className="absolute top-4 right-4 bg-red-600 text-white px-4 py-1.5 rounded-full font-bold text-sm shadow-lg z-50 flex items-center gap-2 animate-pulse print:animate-none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+            FLAGGED
+          </div>
+        )}
         {/* Header Image - CONFIGURABLE */}
         <div className="w-full h-[120px] mb-4 border border-gray-200">
           <img src={headerImage} alt="Agency Header" className="w-full h-full object-contain object-center" />
@@ -63,7 +70,7 @@ function ALMLayoutWithHeader({ candidate, facePhoto, fullBodyPhoto, headerImage 
           <div className="w-[160px] shrink-0">
             <div className="border-[1.5px] border-black h-[190px] w-full p-1 bg-white">
               {facePhoto ? (
-                <img src={facePhoto} className="w-full h-full object-cover border border-gray-200" alt="Face" />
+                <img src={getMediaUrl(facePhoto)} className="w-full h-full object-cover border border-gray-200" alt="Face" />
               ) : (
                 <div className="w-full h-full bg-[#f3f4f6] flex items-center justify-center text-xs text-[#9ca3af] text-center">Face Photo</div>
               )}
@@ -114,7 +121,7 @@ function ALMLayoutWithHeader({ candidate, facePhoto, fullBodyPhoto, headerImage 
           <div className="w-[190px] shrink-0 flex flex-col">
             <div className="border-[1.5px] border-black p-1 bg-white flex-1 relative min-h-0">
               {fullBodyPhoto ? (
-                <img src={fullBodyPhoto} className="absolute top-1 left-1 w-[calc(100%-8px)] h-[calc(100%-8px)] object-contain border border-gray-200" alt="Full Body" />
+                <img src={getMediaUrl(fullBodyPhoto)} className="absolute top-1 left-1 w-[calc(100%-8px)] h-[calc(100%-8px)] object-contain border border-gray-200" alt="Full Body" />
               ) : (
                 <div className="w-full h-full bg-[#f3f4f6] flex items-center justify-center text-xs text-[#9ca3af] text-center">Full Body Photo</div>
               )}
@@ -174,7 +181,7 @@ function ALMLayoutWithHeader({ candidate, facePhoto, fullBodyPhoto, headerImage 
       <div className="p-[10mm] min-h-[297mm] box-border relative flex flex-col gap-6 items-center justify-center break-before-page">
         <CVVideoFooter videoUrl={candidate.videoUrl} />
         {candidate.passportImageUrl ? (
-          <img src={candidate.passportImageUrl} alt="Passport Scan" className="max-w-full max-h-[240mm] object-contain shadow-md print:shadow-none" />
+          <img src={getMediaUrl(candidate.passportImageUrl)} alt="Passport Scan" className="max-w-full max-h-[240mm] object-contain shadow-md print:shadow-none" />
         ) : (
           <div className="text-[#9ca3af] text-lg flex items-center justify-center w-full h-[240mm] border-2 border-dashed border-gray-300">Passport Image Not Available</div>
         )}

@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/api-client';
+
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -30,7 +32,7 @@ export default function RequestedPage() {
   const cancelVisa = async (id: string) => {
     setOpenMenuId(null);
     try {
-      const res = await fetch(`/api/candidates/${id}`, {
+      const res = await apiFetch(`/api/candidates/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isRequested: false, visaOrContractNumber: null }),
@@ -44,7 +46,7 @@ export default function RequestedPage() {
     setOpenMenuId(null);
     if (!confirm('Are you sure you want to delete this candidate?')) return;
     try {
-      const res = await fetch(`/api/candidates/${id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/api/candidates/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error();
       mutate(prev => prev.filter(c => c.id !== id));
     } catch { alert('Failed to delete candidate'); }
@@ -136,7 +138,7 @@ export default function RequestedPage() {
                           <div className="absolute right-0 top-full mt-1 w-52 bg-surface border border-border rounded-xl shadow-xl z-50 py-1 animate-fade-in">
                             <button onClick={() => cancelVisa(c.id)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors text-left">
                               <CheckCircle size={16} className="text-amber-500" />
-                              <span>Cancelled</span>
+                              <span>Visa Cancelled</span>
                             </button>
                             <div className="border-t border-border my-1" />
                             <button onClick={() => deleteCandidate(c.id)} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-red-50 transition-colors text-left text-red-600">

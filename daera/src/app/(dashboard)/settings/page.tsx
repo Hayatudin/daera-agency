@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/api-client';
+
 
 import React, { useState } from 'react';
 import { 
@@ -72,7 +74,7 @@ export default function SettingsPage() {
   const handleSaveProfile = async () => {
     setIsSaving(true);
     try {
-      const res = await fetch('/api/account/profile', {
+      const res = await apiFetch('/api/account/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: profile.name }),
@@ -98,7 +100,7 @@ export default function SettingsPage() {
     }
     setIsSaving(true);
     try {
-      const res = await fetch('/api/account/password', {
+      const res = await apiFetch('/api/account/password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

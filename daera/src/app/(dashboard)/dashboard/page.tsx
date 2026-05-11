@@ -1,4 +1,6 @@
 'use client';
+import { apiFetch } from '@/lib/api-client';
+
 
 import React from 'react';
 import Link from 'next/link';
@@ -43,7 +45,7 @@ export default function DashboardPage() {
         bodyPayload.visaOrContractNumber = null;
       }
 
-      const res = await fetch(`/api/candidates/${id}`, {
+      const res = await apiFetch(`/api/candidates/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bodyPayload),
@@ -57,7 +59,7 @@ export default function DashboardPage() {
     setOpenMenuId(null);
     if (!confirm('Are you sure you want to delete this candidate? This action cannot be undone.')) return;
     try {
-      const res = await fetch(`/api/candidates/${id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/api/candidates/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error();
       setAllCandidates(prev => prev.filter(c => c.id !== id));
     } catch { alert('Failed to delete candidate'); }
